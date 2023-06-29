@@ -1,0 +1,67 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "sync-pre-commit-lock"
+version = "0.1.0"
+description = "PDM plugin to sync your pre-commit versions with your lockfile."
+authors = [
+    {name = "Gabriel Dugny", email = "sync-pre-commit-lock@dugny.me"},
+]
+dependencies = [
+    "pdm>=2.7.4",
+    "PyYAML>=6.0",
+    "ruamel-yaml>=0.17.32",
+]
+requires-python = ">=3.11"
+readme = "README.md"
+license = {text = "MIT"}
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Typing :: Typed",
+]
+[project.urls]
+"Homepage" = "https://github.com/GabDug/sync-pre-commit-lock"
+"Changelog" = "https://github.com/GabDug/sync-pre-commit-lock/blob/main/CHANGELOG.md"
+"Bug Tracker" = "https://github.com/GabDug/sync-pre-commit-lock/issues"
+
+
+[project.entry-points.pdm]
+pdm-sync-pre-commit = "sync_pre_commit_lock:register_pdm_plugin"
+
+[tool.pdm.dev-dependencies]
+dev = [
+    "black>=23.3.0",
+    "autopep8>=2.0.2",
+    "mypy>=1.4.1",
+    "ruff>=0.0.275",
+    "types-PyYAML>=6.0.12.10",
+]
+
+
+[tool.sync-pre-commit-lock]
+disable = false
+ignore = []
+pre-commit-config-file = ".pre-commit-config.yaml"
+# Additionnal mappins in TOML
+# Additional mapping files to load
+# Way to override the default mapping?
+# Add comment to specify that version is managed by sync-pre-commit-lock
+# Support --allow-frozen
+
+
+[tool.ruff]
+line-length = 140
+respect-gitignore = true
+
+[tool.mypy]
+strict = true
