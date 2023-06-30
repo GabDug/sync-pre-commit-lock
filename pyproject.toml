@@ -1,6 +1,6 @@
 [build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
 
 [project]
 name = "sync-pre-commit-lock"
@@ -12,7 +12,6 @@ authors = [
 dependencies = [
     "pdm>=2.7.4",
     "PyYAML>=6.0",
-    "ruamel-yaml>=0.17.32",
 ]
 requires-python = ">=3.11"
 readme = "README.md"
@@ -45,13 +44,22 @@ dev = [
     "mypy>=1.4.1",
     "ruff>=0.0.275",
     "types-PyYAML>=6.0.12.10",
+    "pytest>=7.4.0",
+    "pytest-mock>=3.11.1",
+    "pytest-cov>=4.1.0",
 ]
+# [tool.pdm]
+# plugins = [
+#     "-e file:///${PROJECT_ROOT}"
+# ]
 
 
 [tool.sync-pre-commit-lock]
 disable = false
 ignore = []
 pre-commit-config-file = ".pre-commit-config.yaml"
+[tool.sync-pre-commit-lock.dependency-mapping]
+a = {rev = "1.0.0", repo = "a"}
 # Additionnal mappins in TOML
 # Additional mapping files to load
 # Way to override the default mapping?
@@ -62,6 +70,47 @@ pre-commit-config-file = ".pre-commit-config.yaml"
 [tool.ruff]
 line-length = 140
 respect-gitignore = true
+extend-select = ["Q000", "TCH", "I001"]
+target-version = "py311"
 
 [tool.mypy]
 strict = true
+
+[tool.black]
+line-length = 120
+target-version = ["py311"]
+
+
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+testpaths = ["tests"]
+# markers = [{unit="tests that are isolated from the db, external api calls and other mockable internal code."}]
+norecursedirs = "*.egg .eggs dist build docs .tox .git __pycache__ node_modules .venv __pypackages__"
+
+
+
+addopts = """
+--strict-markers
+--strict-config
+--doctest-modules
+--tb=short
+"""
+[tool.coverage.run]
+branch = true
+
+[tool.coverage.report]
+fail_under = 90.0
+# skip_covered=true
+# skip_empty=true
+
+exclude_lines = [
+  "def __repr__",
+  "if TYPE_CHECKING:",
+  "if settings.DEBUG",
+  "raise AssertionError",
+  "raise NotImplementedError",
+  "if __name__ == .__main__.:",
+  'class .*\bProtocol\):',
+  '@(abc\.)?abstractmethod]',
+]

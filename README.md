@@ -18,7 +18,7 @@ PDM plugin to sync your pre-commit versions with your lockfile.
 - [ ] Add CI
 - [ ] Add docs
 - [ ] Add badges
-- [ ] Add pre-commit hook to run linting
+- [X] Add pre-commit hook to run linting
 - [ ] Create a more verbose command
 - [ ] Add support for poetry
 - [ ] Add support for hatch
@@ -30,6 +30,7 @@ PDM plugin to sync your pre-commit versions with your lockfile.
 - [ ] Support reordering DB inputs (file/global config/python module/cli
 - [ ] Test using SSH/file dependencies
 - [ ] Check ref existence before writing?
+- [ ] Support multiple hooks repos for the same dep?
 
 
 ## Inspiration
