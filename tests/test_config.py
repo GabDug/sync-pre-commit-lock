@@ -12,7 +12,7 @@ def test_from_toml():
         "dependency-mapping": {"pytest": "4.6.1"},
     }
     expected_config = SyncPreCommitLockConfig(
-        disable=True,
+        disable_sync_from_lock=True,
         ignore=["a", "b"],
         pre_commit_config_file=".test-config.yaml",
         dependency_mapping={"pytest": "4.6.1"},
@@ -27,13 +27,13 @@ def test_from_toml():
 
 def test_sync_pre_commit_lock_config():
     config = SyncPreCommitLockConfig(
-        disable=True,
+        disable_sync_from_lock=True,
         ignore=["a", "b"],
         pre_commit_config_file=".test-config.yaml",
         dependency_mapping={"pytest": "4.6.1"},
     )
 
-    assert config.disable is True
+    assert config.disable_sync_from_lock is True
     assert config.ignore == ["a", "b"]
     assert config.pre_commit_config_file == ".test-config.yaml"
     assert config.dependency_mapping == {"pytest": "4.6.1"}
@@ -53,9 +53,9 @@ def test_load_config_with_empty_tool_dict(mock_open, mock_load):
 
 @patch("sync_pre_commit_lock.config.toml.load", return_value={"tool": {"sync-pre-commit-lock": {"disable": True}}})
 @patch("builtins.open", new_callable=MagicMock)
-@patch("sync_pre_commit_lock.config.from_toml", return_value=SyncPreCommitLockConfig(disable=True))
+@patch("sync_pre_commit_lock.config.from_toml", return_value=SyncPreCommitLockConfig(disable_sync_from_lock=True))
 def test_load_config_with_data(mock_from_toml, mock_open, mock_load):
-    expected_config = SyncPreCommitLockConfig(disable=True)
+    expected_config = SyncPreCommitLockConfig(disable_sync_from_lock=True)
 
     actual_config = load_config()
 

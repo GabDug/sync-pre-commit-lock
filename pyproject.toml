@@ -55,7 +55,7 @@ dev = [
 
 
 [tool.sync-pre-commit-lock]
-disable = false
+disable-sync-from-lock = false
 ignore = []
 pre-commit-config-file = ".pre-commit-config.yaml"
 [tool.sync-pre-commit-lock.dependency-mapping]
@@ -85,10 +85,7 @@ target-version = ["py311"]
 [tool.pytest.ini_options]
 minversion = "7.0"
 testpaths = ["tests"]
-# markers = [{unit="tests that are isolated from the db, external api calls and other mockable internal code."}]
 norecursedirs = "*.egg .eggs dist build docs .tox .git __pycache__ node_modules .venv __pypackages__"
-
-
 
 addopts = """
 --strict-markers

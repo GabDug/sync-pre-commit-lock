@@ -10,7 +10,36 @@
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 
-PDM plugin to sync your pre-commit versions with your lockfile.
+PDM plugin to sync your pre-commit versions with your lockfile and automatically install pre-commit hooks.
+
+## Features
+
+- 🔁 Sync pre-commit versions with your lockfile
+- ⏩ Run every time you run the lockfile is updated, not as a pre-commit hook
+- 🔄 Install pre-commit hooks automatically, no need to run `pre-commit install` manually
+
+## Installation
+
+### For PDM
+
+Install it (just like any other PDM plugin)[https://pdm.fming.dev/latest/dev/write/#activate-the-plugin]:
+
+```bash
+pdm self add sync-pre-commit-lock
+```
+
+Optionally, you can also specify [the plugin in your project](https://pdm.fming.dev/latest/dev/write/#specify-the-plugins-in-project) `pyproject.toml`, to share it with your team:
+
+```toml
+[tool.pdm]
+plugins = [
+    "sync-pre-commit-lock"
+]
+```
+
+### For Poetry
+
+This plugin is not yet compatible with Poetry. If you want to use it, please open an issue to let me know!
 
 ## TODO
 
@@ -36,3 +65,5 @@ PDM plugin to sync your pre-commit versions with your lockfile.
 ## Inspiration
 
 This project is inspired by @floatingpurr's [sync_with_pdm](https://github.com/floatingpurr/sync_with_pdm/) and [sync_with_poetry](https://github.com/floatingpurr/sync_with_poetry/).
+
+The inspiration to install pre-commit hooks automatically comes from @vstrimaitis's [poetry-pre-commit-plugin](https://github.com/vstrimaitis/poetry-pre-commit-plugin/)
