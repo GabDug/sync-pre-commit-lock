@@ -1,0 +1,114 @@
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
+[project]
+name = "sync-pre-commit-lock"
+version = "0.1.0"
+description = "PDM plugin to sync your pre-commit versions with your lockfile."
+authors = [{ name = "Gabriel Dugny", email = "sync-pre-commit-lock@dugny.me" }]
+dependencies = ["PyYAML>=6.0", "tomli>=2.0.0; python_version < \"3.11\""]
+requires-python = ">=3.10"
+readme = "README.md"
+license = { file = "LICENSE" }
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Environment :: Console",
+    "Environment :: Plugins",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Typing :: Typed",
+]
+[project.urls]
+"Homepage" = "https://github.com/GabDug/sync-pre-commit-lock"
+"Changelog" = "https://github.com/GabDug/sync-pre-commit-lock/blob/main/CHANGELOG.md"
+"Bug Tracker" = "https://github.com/GabDug/sync-pre-commit-lock/issues"
+
+
+[project.entry-points.pdm]
+pdm-sync-pre-commit-lock = "sync_pre_commit_lock.pdm_plugin:register_pdm_plugin"
+[project.entry-points."poetry.application.plugin"]
+poetry-sync-pre-commit-lock = "sync_pre_commit_lock.poetry_plugin:SyncPreCommitLockPlugin"
+
+
+[project.optional-dependencies]
+poetry = [
+    "poetry @ git+https://github.com/python-poetry/poetry@master",
+]
+pdm = [
+    "pdm>=2.7.4",
+]
+[tool.pdm.dev-dependencies]
+dev = [
+    "black>=23.3.0",
+    "mypy>=1.4.1",
+    "ruff>=0.0.275",
+    "types-PyYAML>=6.0.12.10",
+    "pytest>=7.4.0",
+    "pytest-mock>=3.11.1",
+    "pytest-cov>=4.1.0",
+    "pre-commit>=3.3.3",
+    "tomli>=2.0.1",
+]
+[tool.pdm]
+plugins = [
+    "-e ."
+]
+
+[tool.ruff]
+line-length = 140
+respect-gitignore = true
+extend-select = ["Q000", "TCH", "I001"]
+target-version = "py310"
+
+[tool.mypy]
+strict = true
+
+[tool.black]
+line-length = 120
+target-version = ["py310"]
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+testpaths = ["tests"]
+norecursedirs = "*.egg .eggs dist build docs .tox .git __pycache__ node_modules .venv __pypackages__"
+
+addopts = """
+--strict-markers
+--strict-config
+--doctest-modules
+--tb=short
+"""
+
+[tool.coverage.run]
+branch = true
+include = ["src/*"]
+omit = ["*/tests/*"]
+
+[tool.coverage.report]
+fail_under = 95.0
+
+exclude_lines = [
+    "def __repr__",
+    "if TYPE_CHECKING:",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    'class .*\bProtocol\):',
+    '@(abc\.)?abstractmethod]',
+    "except ImportError:",
+    "# nocov",
+]
+
+# XXX Check if we really need this once 2.6.0 is released.
+# We must configure Poetry as well 🤦
+[tool.poetry]
+name = "sync-pre-commit-lock"
+version = "0.1.0"
