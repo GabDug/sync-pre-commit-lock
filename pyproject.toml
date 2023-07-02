@@ -39,9 +39,10 @@ poetry-sync-pre-commit-lock = "sync_pre_commit_lock.poetry_plugin:SyncPreCommitL
 
 
 [project.optional-dependencies]
-poetry = [
-    "poetry @ git+https://github.com/python-poetry/poetry@master",
-]
+# poetry = [
+#     "poetry @ git+https://github.com/python-poetry/poetry@master",
+# ]
+# XXX Add Poetry when 1.6.0 release
 pdm = [
     "pdm>=2.7.4",
 ]

@@ -49,10 +49,9 @@ jobs:
     - name: Install dependencies
       run: |
         pdm config venv.with_pip True
-        pdm install -G poetry --dev
+        pdm install -G :all --dev
         pdm venv activate in-project
         source .venv/bin/activate
-        # Force install of pdm in the virtualenv
 
         # Get the pip command to run dependending on matrix.pdm-version
         # We force reinstall of pdm in the virtualenv
@@ -63,6 +62,9 @@ jobs:
         else
           pip install pdm==${{ matrix.pdm-version }}
         fi
+
+        # XXX Force install of Poetry in the virtualenv
+        pip install "poetry @ git+https://github.com/python-poetry/poetry@master"
 
     - name: Test with pytest
       run: |
