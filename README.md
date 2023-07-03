@@ -34,7 +34,7 @@ Install it [just like any other PDM plugin](https://pdm.fming.dev/latest/dev/wri
 pdm self add "sync-pre-commit-lock[pdm]""
 ```
 
-Optionally, you can also specify [the plugin in your project](https://pdm.fming.dev/latest/dev/write/#specify-the-plugins-in-project) `pyproject.toml`, to share it with your team:
+Optionally, you can also specify [the plugin in your project](https://pdm.fming.dev/latest/dev/write/#specify-the-plugins-in-project) `pyproject.toml`, to make it installable with `pdm install --plugins`:
 
 ```toml
 [tool.pdm]

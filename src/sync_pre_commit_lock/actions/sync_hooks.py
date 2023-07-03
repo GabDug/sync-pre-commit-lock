@@ -45,14 +45,16 @@ class PreCommitHookConfig:
     @classmethod
     def from_yaml_file(cls, file_path: Path) -> PreCommitHookConfig:
         with file_path.open("r") as stream:
-            x = yaml.safe_load(stream)
-            if not isinstance(x, dict):
-                raise ValueError(f"Invalid pre-commit config file: {file_path}. Expected a dict, got {type(x)}")
-            if "repos" in x and not isinstance(x["repos"], list):
-                raise ValueError(
-                    f"Invalid pre-commit config file: {file_path}. Expected a list for `repos`, got {type(x['repos'])}"
-                )
-            return PreCommitHookConfig(x, file_path, original_file_lines=stream.readlines())
+            file_contents = stream.read()
+
+        data = yaml.safe_load(file_contents)
+        if not isinstance(data, dict):
+            raise ValueError(f"Invalid pre-commit config file: {file_path}. Expected a dict, got {type(data)}")
+        if "repos" in data and not isinstance(data["repos"], list):
+            raise ValueError(
+                f"Invalid pre-commit config file: {file_path}. Expected a list for `repos`, got {type(data['repos'])}"
+            )
+        return PreCommitHookConfig(data, file_path, original_file_lines=file_contents.splitlines(keepends=True))
 
     @cached_property
     def repos(self) -> list[PreCommitRepo]:
@@ -125,14 +127,14 @@ class SyncPreCommitHooksVersion:
         to_fix = self.analyze_repos(pre_commit_config_data.repos_normalized, mapping, mapping_reverse_by_url)
 
         if len(to_fix) == 0:
-            self.printer.info("All matched pre-commit hooks already in sync with the lockfile!")
+            self.printer.success("All matched pre-commit hooks already in sync with the lockfile!")
             return
 
         self.printer.info("Detected pre-commit hooks that can be updated to match the lockfile:")
         for repo, rev in to_fix.items():
             self.printer.info(f"  - {repo.repo}: {repo.rev} -> {rev}")
         pre_commit_config_data.update_pre_commit_repo_versions(to_fix)
-        self.printer.info("Pre-commit hooks have been updated to match the lockfile!")
+        self.printer.success("Pre-commit hooks have been updated to match the lockfile!")
 
     def get_pre_commit_repo_new_version(
         self,
@@ -149,10 +151,10 @@ class SyncPreCommitHooksVersion:
         )
         formatted_rev = mapping_db_repo_info["rev"].replace("${rev}", str(locked_package.version))
         if formatted_rev != pre_commit_config_repo.rev:
-            self.printer.warning(
+            self.printer.debug(
                 f"Pre-commit hook {pre_commit_config_repo.repo} and locked package {locked_package.name} have different versions:\n"
-                f"  Pre-commit hook ref: {pre_commit_config_repo.rev}\n"
-                f"  Locked package version: {locked_package.version}\n"
+                f" - Pre-commit hook ref: {pre_commit_config_repo.rev}\n"
+                f" - Locked package version: {locked_package.version}"
             )
             return formatted_rev
         else:

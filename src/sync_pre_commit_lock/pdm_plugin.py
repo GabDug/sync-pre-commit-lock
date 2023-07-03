@@ -20,29 +20,38 @@ if TYPE_CHECKING:
     from pdm.core import Core
     from pdm.models.candidates import Candidate
     from pdm.project import Project
+    from pdm.termui import UI
 
 
 class PDMPrinter(Printer):
-    def __init__(self, project: Project, **_: Any):
-        self.project = project
+    def __init__(self, ui: UI, **_: Any):
+        self.ui = ui
         self.plugin_prefix = "\\[sync-pre-commit-lock]"
 
+    def prefix_lines(self, msg: str) -> str:
+        lines = msg.split("\n")
+        return "\n".join(f"{self.plugin_prefix} {line}" for line in lines)
+
     def debug(self, msg: str) -> None:
-        self.project.core.ui.echo(f"[info]{self.plugin_prefix} " + msg + "[/info]", verbosity=Verbosity.DEBUG)
+        self.ui.echo(self.prefix_lines("[debug]" + msg + "[/debug]"), verbosity=Verbosity.DEBUG)
 
     def info(self, msg: str) -> None:
-        self.project.core.ui.echo(f"[info]{self.plugin_prefix} " + msg + "[/info]", verbosity=Verbosity.NORMAL)
+        self.ui.echo("[info]" + self.prefix_lines(msg) + "[/info]", verbosity=Verbosity.NORMAL)
 
     def warning(self, msg: str) -> None:
-        self.project.core.ui.echo(f"[warning]{self.plugin_prefix} " + msg + "[/warning]", verbosity=Verbosity.NORMAL)
+        self.ui.echo("[warning]" + self.prefix_lines(msg) + "[/warning]", verbosity=Verbosity.NORMAL)
 
     def error(self, msg: str) -> None:
-        self.project.core.ui.echo(f"[error]{self.plugin_prefix} " + msg + "[/error]", verbosity=Verbosity.NORMAL)
+        self.ui.echo("[error]" + self.prefix_lines(msg) + "[/error]", verbosity=Verbosity.NORMAL)
+
+    def success(self, msg: str) -> None:
+        self.ui.echo("[success]" + self.prefix_lines(msg) + "[/success]", verbosity=Verbosity.NORMAL)
 
 
 def register_pdm_plugin(core: Core) -> None:
     """Register the plugin to PDM Core."""
-    pass
+    printer = PDMPrinter(core.ui)
+    printer.debug("Registered sync-pre-commit-lock plugin.")
 
 
 class PDMSetupPreCommitHooks(SetupPreCommitHooks):
@@ -58,7 +67,7 @@ class PDMSyncPreCommitHooksVersion(SyncPreCommitHooksVersion):
 def on_pdm_install_setup_pre_commit(
     project: Project, *, hooks: HookManager, candidates: list[Candidate], dry_run: bool, **_: Any
 ) -> None:
-    printer = PDMPrinter(project)
+    printer = PDMPrinter(project.core.ui)
     plugin_config: SyncPreCommitLockConfig = load_config()
     printer.debug("Checking if pre-commit hooks are installed")
 
@@ -81,7 +90,7 @@ def on_pdm_lock_check_pre_commit(
     project: Project, *, resolution: dict[str, Candidate], dry_run: bool, **kwargs: Any
 ) -> None:
     plugin_config: SyncPreCommitLockConfig = load_config()
-    printer = PDMPrinter(project)
+    printer = PDMPrinter(project.core.ui)
     project_root: Path = project.root
 
     file_path = project_root / plugin_config.pre_commit_config_file

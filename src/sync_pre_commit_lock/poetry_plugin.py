@@ -33,7 +33,7 @@ class PoetryPrinter(Printer):
         self.plugin_prefix = "[sync-pre-commit-lock]"
 
     def debug(self, msg: str) -> None:
-        self.io.write_line(f"<info>{self.plugin_prefix} {msg}</info>", verbosity=Verbosity.NORMAL)
+        self.io.write_line(f"<info>{self.plugin_prefix} {msg}</info>", verbosity=Verbosity.DEBUG)
 
     def info(self, msg: str) -> None:
         self.io.write_line(f"<info>{self.plugin_prefix} {msg}</info>", verbosity=Verbosity.NORMAL)
@@ -43,6 +43,9 @@ class PoetryPrinter(Printer):
 
     def error(self, msg: str) -> None:
         return self.io.write_error_line(f"<error>{self.plugin_prefix} {msg}</error>", verbosity=Verbosity.NORMAL)
+
+    def success(self, msg: str) -> None:
+        return self.io.write_line(f"<success>{self.plugin_prefix} {msg}</success>", verbosity=Verbosity.NORMAL)
 
 
 class PoetrySetupPreCommitHooks(SetupPreCommitHooks):

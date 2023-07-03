@@ -24,18 +24,17 @@ def test_data_setter_raises_not_implemented_error() -> None:
         config.data = {"new": "data"}
 
 
-@patch("sync_pre_commit_lock.actions.sync_hooks.yaml")
-def test_from_yaml_file(mock_yaml: MagicMock) -> None:
-    mock_yaml.safe_load.return_value = {"repos": [{"repo": "repo1", "rev": "rev1"}]}
-
+def test_from_yaml_file() -> None:
+    file_data = "repos:\n- repo: repo1\n  rev: rev1\n"
     mock_path = MagicMock(spec=Path)
-    mock_path.open = mock_open(read_data="dummy_stream")
+    mock_path.open = mock_open(read_data=file_data)
 
     config = PreCommitHookConfig.from_yaml_file(mock_path)
 
     mock_path.open.assert_called_once_with("r")
     assert config.data == {"repos": [{"repo": "repo1", "rev": "rev1"}]}
     assert config.pre_commit_config_file_path == mock_path
+    assert config.original_file_lines == file_data.splitlines(keepends=True)
 
 
 @patch("sync_pre_commit_lock.actions.sync_hooks.yaml")

@@ -125,7 +125,7 @@ def test_execute_synchronizes_hooks(
     mock_build_mapping.assert_called_once()
     mock_analyze_repos.assert_called_once()
     pre_commit_config.update_pre_commit_repo_versions.assert_called_once_with({PreCommitRepo("repo1", "rev1"): "rev2"})
-    printer.info.assert_called_with("Pre-commit hooks have been updated to match the lockfile!")
+    printer.success.assert_called_with("Pre-commit hooks have been updated to match the lockfile!")
 
 
 @patch("sync_pre_commit_lock.actions.sync_hooks.PreCommitHookConfig.from_yaml_file")
@@ -161,7 +161,7 @@ def test_execute_synchronizes_hooks_all_good(
     mock_build_mapping.assert_called_once()
     mock_analyze_repos.assert_called_once()
     pre_commit_config.update_pre_commit_repo_versions.assert_not_called()
-    printer.info.assert_called_with("All matched pre-commit hooks already in sync with the lockfile!")
+    printer.success.assert_called_with("All matched pre-commit hooks already in sync with the lockfile!")
 
 
 def test_get_pre_commit_repo_new_version() -> None:

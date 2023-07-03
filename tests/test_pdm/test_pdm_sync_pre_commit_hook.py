@@ -33,10 +33,11 @@ def printer() -> Printer:
     return x
 
 
-def test_register_pdm_plugin() -> None:
-    core = MagicMock(spec=Core)
+def test_register_pdm_plugin(project: Project) -> None:
+    core = project.core
     register_pdm_plugin(core)
     # As function has no implementation currently, nothing to assert
+    assert core.ui.echo.call_count == 1
 
 
 @patch("sync_pre_commit_lock.pdm_plugin.load_config")
