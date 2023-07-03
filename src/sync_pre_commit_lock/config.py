@@ -44,7 +44,7 @@ class SyncPreCommitLockConfig:
 
 
 def load_config() -> SyncPreCommitLockConfig:
-    # XXX We Should not harcode this, and get the filename from PDM/Poetry/custom resolution
+    # XXX We Should not hardcode this, and get the filename from PDM/Poetry/custom resolution
     with open("pyproject.toml", "rb") as file:
         config_dict = toml.load(file)
 

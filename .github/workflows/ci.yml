@@ -53,7 +53,7 @@ jobs:
         pdm venv activate in-project
         source .venv/bin/activate
 
-        # Get the pip command to run dependending on matrix.pdm-version
+        # Get the pip command to run depending on matrix.pdm-version
         # We force reinstall of pdm in the virtualenv
         if [[ "${{ matrix.pdm-version }}" == "head" ]]; then
           pip install "pdm @ git+https://github.com/pdm-project/pdm"

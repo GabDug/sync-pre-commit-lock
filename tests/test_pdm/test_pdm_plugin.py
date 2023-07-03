@@ -34,10 +34,10 @@ def test_on_pdm_install_setup_pre_commit_auto_install_disabled() -> None:
     printer_mock.debug.assert_any_call("Automatically installing pre-commit hooks is disabled. Skipping.")
 
 
-def test_on_pdm_install_setup_pre_commit_no_config_file() -> None:
+def test_on_pdm_install_setup_pre_commit_no_config_file(tmp_path: Path) -> None:
     config_mock.automatically_install_hooks = True
     config_mock.pre_commit_config_file = SyncPreCommitLockConfig.pre_commit_config_file
-    project_mock.root = Path("/tmp")
+    project_mock.root = tmp_path
     with mock.patch("sync_pre_commit_lock.pdm_plugin.PDMPrinter", return_value=printer_mock), mock.patch(
         "sync_pre_commit_lock.pdm_plugin.load_config", return_value=config_mock
     ):
