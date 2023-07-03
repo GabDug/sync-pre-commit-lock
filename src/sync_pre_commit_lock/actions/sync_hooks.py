@@ -63,7 +63,7 @@ class PreCommitHookConfig:
         return {PreCommitRepo(repo=normalize_git_url(repo.repo), rev=repo.rev) for repo in self.repos}
 
     def update_pre_commit_repo_versions(self, new_versions: dict[PreCommitRepo, str]) -> None:
-        """Fixes the pre-commit hooks to match the lockfile. Preserves comments and formatting as much as possible."""
+        """Fix the pre-commit hooks to match the lockfile. Preserve comments and formatting as much as possible."""
 
         original_lines = self.original_file_lines
         updated_lines = original_lines[:]
@@ -82,7 +82,7 @@ class PreCommitHookConfig:
 
         if change_count == 0:
             return
-        with open(self.pre_commit_config_file_path, "w") as stream:
+        with self.pre_commit_config_file_path.open("w") as stream:
             stream.writelines(updated_lines)
 
 

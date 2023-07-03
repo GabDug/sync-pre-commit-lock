@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import os
 from pathlib import Path
 from typing import TYPE_CHECKING, ClassVar
 
@@ -63,8 +62,6 @@ class SyncPreCommitLockPlugin(ApplicationPlugin):
     def _handle_post_command(
         self, event: ConsoleTerminateEvent | Event, event_name: str, dispatcher: EventDispatcher
     ) -> None:
-        print("SyncPreCommitLockPlugin handling post command")
-
         assert isinstance(event, ConsoleTerminateEvent)
         if event.exit_code != 0:
             # The command failed, so the plugin shouldn't do anything
@@ -91,7 +88,7 @@ class SyncPreCommitLockPlugin(ApplicationPlugin):
                 str(p.name): GenericLockedPackage(p.name, str(p.version)) for p in poetry_locked_packages
             }
             plugin_config = load_config()
-            file_path = Path(os.getcwd()) / plugin_config.pre_commit_config_file
+            file_path = Path().cwd() / plugin_config.pre_commit_config_file
 
             SyncPreCommitHooksVersion(
                 printer,

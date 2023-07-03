@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import TYPE_CHECKING, Any, TypeVar
 
 try:
@@ -43,9 +44,10 @@ class SyncPreCommitLockConfig:
     dependency_mapping: PackageRepoMapping = field(default_factory=dict, metadata={"toml": "dependency-mapping"})
 
 
-def load_config() -> SyncPreCommitLockConfig:
+def load_config(path: Path | None = None) -> SyncPreCommitLockConfig:
     # XXX We Should not hardcode this, and get the filename from PDM/Poetry/custom resolution
-    with open("pyproject.toml", "rb") as file:
+    path = path or Path("pyproject.toml")
+    with path.open("rb") as file:
         config_dict = toml.load(file)
 
     tool_dict = config_dict.get("tool", {}).get("sync-pre-commit-lock", {})

@@ -18,10 +18,7 @@ def normalize_git_url(url: str) -> str:
         scheme = "https"
 
     # Lowercase the hostname and remove default port if it exists
-    if parsed_url.hostname:
-        netloc = parsed_url.hostname.lower()
-    else:
-        netloc = ""
+    netloc = parsed_url.hostname.lower() if parsed_url.hostname else ""
 
     # If netloc is empty (git, ssh URLs), then path contains it.
     if not netloc:

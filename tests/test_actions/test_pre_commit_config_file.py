@@ -80,6 +80,7 @@ def test_repos_property() -> None:
 def test_update_pre_commit_repo_versions(mock_open_file: MagicMock, mock_re: MagicMock, mock_diff: MagicMock) -> None:
     data = {"repos": [{"repo": "repo1", "rev": "rev1"}]}
     mock_path = MagicMock(spec=Path)
+    mock_path.open = mock_open(read_data="dummy_stream")
     original_file_lines = ["repos:\n", "  - repo: repo1\n", "    rev: rev1\n"]
 
     config = PreCommitHookConfig(data, mock_path, original_file_lines=original_file_lines)
@@ -91,7 +92,7 @@ def test_update_pre_commit_repo_versions(mock_open_file: MagicMock, mock_re: Mag
 
     config.update_pre_commit_repo_versions(new_versions)
 
-    mock_open_file.assert_called_once_with(mock_path, "w")  # asserts the file is opened for writing
+    mock_path.open.assert_called_once_with("w")  # asserts the file is opened for writing
     mock_re.sub.assert_called_once_with(r"(?<=rev: )\S*", "rev2", "    rev: rev1\n")
     assert mock_diff.ndiff.called
 

@@ -42,11 +42,12 @@ def test_sync_pre_commit_lock_config() -> None:
 @patch("builtins.open", new_callable=MagicMock)
 def test_load_config_with_empty_tool_dict(mock_open: MagicMock, mock_load: MagicMock) -> None:
     expected_config = SyncPreCommitLockConfig()
-
-    actual_config = load_config()
+    mock_path = MagicMock()
+    mock_path.open = mock_open(read_data="dummy_stream")
+    actual_config = load_config(mock_path)
 
     assert actual_config == expected_config
-    mock_open.assert_called_once_with("pyproject.toml", "rb")
+    mock_path.open.assert_called_once_with("rb")
     mock_load.assert_called_once()
 
 
@@ -55,10 +56,11 @@ def test_load_config_with_empty_tool_dict(mock_open: MagicMock, mock_load: Magic
 @patch("sync_pre_commit_lock.config.from_toml", return_value=SyncPreCommitLockConfig(disable_sync_from_lock=True))
 def test_load_config_with_data(mock_from_toml: MagicMock, mock_open: MagicMock, mock_load: MagicMock) -> None:
     expected_config = SyncPreCommitLockConfig(disable_sync_from_lock=True)
-
-    actual_config = load_config()
+    mock_path = MagicMock()
+    mock_path.open = mock_open(read_data="dummy_stream")
+    actual_config = load_config(mock_path)
 
     assert actual_config == expected_config
-    mock_open.assert_called_once_with("pyproject.toml", "rb")
+    mock_path.open.assert_called_once_with("rb")
     mock_load.assert_called_once()
     mock_from_toml.assert_called_once_with({"disable": True})
