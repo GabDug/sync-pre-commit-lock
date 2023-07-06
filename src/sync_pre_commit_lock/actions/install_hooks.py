@@ -65,7 +65,7 @@ class SetupPreCommitHooks:
                 self.check_pre_commit_version_command,  # noqa: S603
             ).decode()
             return "pre-commit" in output
-        except FileNotFoundError:
+        except (subprocess.CalledProcessError, FileNotFoundError):
             return False
 
     @staticmethod
