@@ -4,10 +4,13 @@ build-backend = "pdm.backend"
 
 [project]
 name = "sync-pre-commit-lock"
-version = "0.1.2"
+version = "0.2.0"
 description = "PDM plugin to sync your pre-commit versions with your lockfile, and install them, all automatically."
 authors = [{ name = "Gabriel Dugny", email = "sync-pre-commit-lock@dugny.me" }]
-dependencies = ["PyYAML>=6.0", "tomli>=2.0.0; python_version < \"3.11\""]
+dependencies = [
+    "tomli>=2.0.0; python_version < \"3.11\"",
+    "strictyaml>=1.7.3",
+]
 requires-python = ">=3.10"
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -48,6 +51,7 @@ pdm = [
 ]
 [tool.pdm.dev-dependencies]
 dev = [
+    "PyYAML>=6.0",
     "black>=23.3.0",
     "mypy>=1.4.1",
     "ruff>=0.0.275",
@@ -72,6 +76,10 @@ target-version = "py310"
 
 [tool.mypy]
 strict = true
+
+[[tool.mypy.overrides]]
+module = "strictyaml"
+ignore_missing_imports = true
 
 [tool.black]
 line-length = 120
