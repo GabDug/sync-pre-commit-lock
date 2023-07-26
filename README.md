@@ -105,6 +105,7 @@ Feel free to open an issue or a PR if you have any idea, or if you want to help!
 - [ ] Check ref existence before writing?
 - [ ] Support multiple hooks repos for the same dependency?
 - [ ] New feature to convert from pre-commit online to local?
+- [ ] Warning if pre-commit CI auto update is also set?
 
 ## Inspiration
 
