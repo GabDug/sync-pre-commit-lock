@@ -1,0 +1,33 @@
+
+# Many unused lines before document separator
+
+---
+default_language_version:
+  python: python3.11
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: check-toml
+
+  - repo: https://github.com/psf/black
+    rev: 23.2.0
+    hooks:
+      - id: black
+
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: 'v0.0.275'
+    hooks:
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
+
+  - repo: local
+    hooks:
+      - id: mypy
+        name: mypy
+        entry: mypy
+        args: [src, tests, --color-output]
+        language: system
+        types: [python]
+        pass_filenames: false
+        require_serial: true

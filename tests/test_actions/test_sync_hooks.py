@@ -4,12 +4,11 @@ from unittest.mock import MagicMock, patch
 from sync_pre_commit_lock import Printer
 from sync_pre_commit_lock.actions.sync_hooks import (
     GenericLockedPackage,
-    PreCommitHookConfig,
-    PreCommitRepo,
     SyncPreCommitHooksVersion,
 )
 from sync_pre_commit_lock.config import SyncPreCommitLockConfig
 from sync_pre_commit_lock.db import PackageRepoMapping, RepoInfo
+from sync_pre_commit_lock.pre_commit_config import PreCommitHookConfig, PreCommitRepo
 
 
 def test_execute_returns_early_when_disabled() -> None:
@@ -50,7 +49,7 @@ def test_execute_returns_early_during_dry_run() -> None:
     printer.debug.assert_called_once_with("Dry run, skipping pre-commit hook check")
 
 
-@patch("sync_pre_commit_lock.actions.sync_hooks.PreCommitHookConfig.from_yaml_file", side_effect=FileNotFoundError())
+@patch("sync_pre_commit_lock.pre_commit_config.PreCommitHookConfig.from_yaml_file", side_effect=FileNotFoundError())
 def test_execute_handles_file_not_found(mock_from_yaml_file: MagicMock) -> None:
     printer = MagicMock(spec=Printer)
     pre_commit_config_file_path = MagicMock(spec=Path)
@@ -72,7 +71,7 @@ def test_execute_handles_file_not_found(mock_from_yaml_file: MagicMock) -> None:
     )
 
 
-@patch("sync_pre_commit_lock.actions.sync_hooks.PreCommitHookConfig.from_yaml_file", side_effect=ValueError())
+@patch("sync_pre_commit_lock.pre_commit_config.PreCommitHookConfig.from_yaml_file", side_effect=ValueError())
 def test_execute_handles_file_invalid(mock_from_yaml_file: MagicMock) -> None:
     printer = MagicMock(spec=Printer)
     pre_commit_config_file_path = MagicMock(spec=Path)
@@ -92,7 +91,7 @@ def test_execute_handles_file_invalid(mock_from_yaml_file: MagicMock) -> None:
     printer.error.assert_called_once_with(f"Invalid pre-commit config file: {pre_commit_config_file_path}: ")
 
 
-@patch("sync_pre_commit_lock.actions.sync_hooks.PreCommitHookConfig.from_yaml_file")
+@patch("sync_pre_commit_lock.pre_commit_config.PreCommitHookConfig.from_yaml_file")
 @patch.object(SyncPreCommitHooksVersion, "build_mapping")
 @patch.object(SyncPreCommitHooksVersion, "analyze_repos")
 def test_execute_synchronizes_hooks(
@@ -128,7 +127,7 @@ def test_execute_synchronizes_hooks(
     printer.success.assert_called_with("Pre-commit hooks have been updated to match the lockfile!")
 
 
-@patch("sync_pre_commit_lock.actions.sync_hooks.PreCommitHookConfig.from_yaml_file")
+@patch("sync_pre_commit_lock.pre_commit_config.PreCommitHookConfig.from_yaml_file")
 @patch.object(SyncPreCommitHooksVersion, "build_mapping")
 @patch.object(SyncPreCommitHooksVersion, "analyze_repos")
 def test_execute_synchronizes_hooks_all_good(
@@ -161,7 +160,7 @@ def test_execute_synchronizes_hooks_all_good(
     mock_build_mapping.assert_called_once()
     mock_analyze_repos.assert_called_once()
     pre_commit_config.update_pre_commit_repo_versions.assert_not_called()
-    printer.success.assert_called_with("All matched pre-commit hooks already in sync with the lockfile!")
+    printer.info.assert_called_with("All matched pre-commit hooks already in sync with the lockfile!")
 
 
 def test_get_pre_commit_repo_new_version() -> None:

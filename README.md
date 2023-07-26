@@ -103,8 +103,9 @@ Feel free to open an issue or a PR if you have any idea, or if you want to help!
 - [ ] Support reordering DB inputs (file/global config/python module/cli)?
 - [ ] Test using SSH/file dependencies?
 - [ ] Check ref existence before writing?
-- [ ] Support multiple hooks repos for the same dependency?
+- [ ] Support multiple hooks repos for the same dependency? E.g. ruff new and old repo
 - [ ] New feature to convert from pre-commit online to local?
+- [ ] Warning if pre-commit CI auto update is also set?
 
 ## Inspiration
 

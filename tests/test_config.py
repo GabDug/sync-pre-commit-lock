@@ -4,7 +4,6 @@ from sync_pre_commit_lock.config import SyncPreCommitLockConfig, from_toml, load
 from sync_pre_commit_lock.db import RepoInfo
 
 
-# @patch('sync_pre_commit_lock.config.SyncPreCommitLockConfig.__dataclass_fields__', new_callable=MagicMock)
 def test_from_toml() -> None:
     data = {
         "disable-sync-from-lock": True,
