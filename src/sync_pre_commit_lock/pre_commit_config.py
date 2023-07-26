@@ -77,21 +77,18 @@ class PreCommitHookConfig:
 
     @cached_property
     def document_start_offset(self) -> int:
-        # Use re to split by lines and find the '---'
+        """Return the line number where the YAML document starts."""
+
         lines = self.raw_file_contents.split("\n")
         for i, line in enumerate(lines):
             # Trim leading/trailing whitespaces
-            line = line.strip()
+            line = line.rstrip()
             # Skip if line is a comment or empty/whitespace
             if line.startswith("#") or line == "":
                 continue
             # If line is '---', return line number + 1
             if line == "---":
                 return i + 1
-            # If line isn't a comment and not '---' or empty/whitespace, it's the start of the YAML doc
-            # We return the line number (add 1 for 1-based indexing)
-            else:
-                return i
         return 0
 
     def update_pre_commit_repo_versions(self, new_versions: dict[PreCommitRepo, str]) -> None:
@@ -112,17 +109,15 @@ class PreCommitHookConfig:
             if normalized_repo not in new_versions:
                 continue
 
-            rev_line_number = rev.end_line + self.document_start_offset
-            rev_line_idx = rev_line_number - 1
+            rev_line_number: int = rev.end_line + self.document_start_offset
+            rev_line_idx: int = rev_line_number - 1
             original_rev_line: str = updated_lines[rev_line_idx]
-
             updated_lines[rev_line_idx] = original_rev_line.replace(str(rev), new_versions[normalized_repo])
 
         changes = difflib.ndiff(original_lines, updated_lines)
         change_count = sum(1 for change in changes if change[0] in ["+", "-"])
 
         if change_count == 0:
-            # XXX We should probably raise an exception here
-            return
+            raise RuntimeError("No changes to write, this should not happen")
         with self.pre_commit_config_file_path.open("w") as stream:
             stream.writelines(updated_lines)

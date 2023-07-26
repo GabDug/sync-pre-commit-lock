@@ -47,3 +47,30 @@ def test_repos_property() -> None:
     assert config.repos[0].repo == "https://repo1.local:443/test"
     assert config.repos[0].rev == "rev1"
     assert config.repos_normalized == {PreCommitRepo("https://repo1.local/test", "rev1")}
+
+
+FIXTURES = Path(__file__).parent / "fixtures" / "sample_pre_commit_config"
+
+
+@pytest.mark.parametrize(
+    ("path", "offset"),
+    [
+        (FIXTURES / "pre-commit-config-document-separator.yaml", 4),
+        (FIXTURES / "pre-commit-config-start-empty-lines.yaml", 0),
+        (FIXTURES / "pre-commit-config-with-local.yaml", 2),
+        (FIXTURES / "pre-commit-config.yaml", 1),
+        (FIXTURES / "sample-django-stubs.yaml", 0),
+    ],
+)
+def test_files_offset(path: Path, offset: int) -> None:
+    config = PreCommitHookConfig.from_yaml_file(path)
+    assert config.document_start_offset == offset
+
+
+def test_update_versions():
+    config = PreCommitHookConfig.from_yaml_file(FIXTURES / "pre-commit-config-document-separator.yaml")
+    config.pre_commit_config_file_path = MagicMock()
+
+    config.update_pre_commit_repo_versions({PreCommitRepo("https://github.com/psf/black", "23.2.0"): "23.3.0"})
+    # Assert open was called with "w" mode
+    assert config.pre_commit_config_file_path.open.call_args[0][0] == "w"
