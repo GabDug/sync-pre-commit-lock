@@ -72,5 +72,11 @@ def test_update_versions():
     config.pre_commit_config_file_path = MagicMock()
 
     config.update_pre_commit_repo_versions({PreCommitRepo("https://github.com/psf/black", "23.2.0"): "23.3.0"})
-    # Assert open was called with "w" mode
     assert config.pre_commit_config_file_path.open.call_args[0][0] == "w"
+
+    config.update_pre_commit_repo_versions({})
+    assert config.pre_commit_config_file_path.open.call_count == 1
+
+    with pytest.raises(RuntimeError):
+        config.update_pre_commit_repo_versions({PreCommitRepo("https://github.com/psf/notexist", "23.2.0"): "23.3.0"})
+        assert config.pre_commit_config_file_path.open.call_count == 1
