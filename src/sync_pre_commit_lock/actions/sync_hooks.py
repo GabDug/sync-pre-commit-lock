@@ -1,14 +1,9 @@
 from __future__ import annotations
 
-import difflib
-import re
-from functools import cached_property
-from typing import TYPE_CHECKING, Any, NamedTuple
-
-import yaml
+from typing import TYPE_CHECKING, NamedTuple
 
 from sync_pre_commit_lock.db import DEPENDENCY_MAPPING, PackageRepoMapping, RepoInfo
-from sync_pre_commit_lock.utils import normalize_git_url
+from sync_pre_commit_lock.pre_commit_config import PreCommitHookConfig, PreCommitRepo
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -21,71 +16,6 @@ class GenericLockedPackage(NamedTuple):
     name: str
     version: str
     # Add original data here?
-
-
-class PreCommitRepo(NamedTuple):
-    repo: str
-    rev: str  # Check if is not loaded as float/int/other yolo
-
-
-class PreCommitHookConfig:
-    def __init__(self, data: dict[str, Any], pre_commit_config_file_path: Path, original_file_lines: list[str]) -> None:
-        self._data = data
-        self.pre_commit_config_file_path = pre_commit_config_file_path
-        self.original_file_lines: list[str] = original_file_lines
-
-    @property
-    def data(self) -> dict[str, Any]:
-        return self._data
-
-    @data.setter
-    def data(self, value: dict[str, Any]) -> None:
-        raise NotImplementedError("This should not be used. Recreate the object instead.")
-
-    @classmethod
-    def from_yaml_file(cls, file_path: Path) -> PreCommitHookConfig:
-        with file_path.open("r") as stream:
-            file_contents = stream.read()
-
-        data = yaml.safe_load(file_contents)
-        if not isinstance(data, dict):
-            raise ValueError(f"Invalid pre-commit config file: {file_path}. Expected a dict, got {type(data)}")
-        if "repos" in data and not isinstance(data["repos"], list):
-            raise ValueError(
-                f"Invalid pre-commit config file: {file_path}. Expected a list for `repos`, got {type(data['repos'])}"
-            )
-        return PreCommitHookConfig(data, file_path, original_file_lines=file_contents.splitlines(keepends=True))
-
-    @cached_property
-    def repos(self) -> list[PreCommitRepo]:
-        return [PreCommitRepo(repo=repo["repo"], rev=repo["rev"]) for repo in (self.data["repos"] or [])]
-
-    @cached_property
-    def repos_normalized(self) -> set[PreCommitRepo]:
-        return {PreCommitRepo(repo=normalize_git_url(repo.repo), rev=repo.rev) for repo in self.repos}
-
-    def update_pre_commit_repo_versions(self, new_versions: dict[PreCommitRepo, str]) -> None:
-        """Fix the pre-commit hooks to match the lockfile. Preserve comments and formatting as much as possible."""
-
-        original_lines = self.original_file_lines
-        updated_lines = original_lines[:]
-        pre_commit_data = self.data
-
-        for repo, rev in new_versions.items():
-            for pre_commit_repo in pre_commit_data["repos"]:
-                if pre_commit_repo["repo"] != repo.repo:
-                    continue
-                rev_line_number = [i for i, line in enumerate(original_lines) if f"repo: {repo.repo}" in line][0] + 1
-                original_rev_line = updated_lines[rev_line_number]
-                updated_lines[rev_line_number] = re.sub(r"(?<=rev: )\S*", rev, original_rev_line)
-
-        changes = difflib.ndiff(original_lines, updated_lines)
-        change_count = sum(1 for change in changes if change[0] in ["+", "-"])
-
-        if change_count == 0:
-            return
-        with self.pre_commit_config_file_path.open("w") as stream:
-            stream.writelines(updated_lines)
 
 
 class SyncPreCommitHooksVersion:
@@ -127,12 +57,12 @@ class SyncPreCommitHooksVersion:
         to_fix = self.analyze_repos(pre_commit_config_data.repos_normalized, mapping, mapping_reverse_by_url)
 
         if len(to_fix) == 0:
-            self.printer.success("All matched pre-commit hooks already in sync with the lockfile!")
+            self.printer.info("All matched pre-commit hooks already in sync with the lockfile!")
             return
 
         self.printer.info("Detected pre-commit hooks that can be updated to match the lockfile:")
         for repo, rev in to_fix.items():
-            self.printer.info(f"  - {repo.repo}: {repo.rev} -> {rev}")
+            self.printer.info(f" - {repo.repo}: {repo.rev} -> {rev}")
         pre_commit_config_data.update_pre_commit_repo_versions(to_fix)
         self.printer.success("Pre-commit hooks have been updated to match the lockfile!")
 
