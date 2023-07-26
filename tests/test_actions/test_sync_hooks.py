@@ -160,7 +160,7 @@ def test_execute_synchronizes_hooks_all_good(
     mock_build_mapping.assert_called_once()
     mock_analyze_repos.assert_called_once()
     pre_commit_config.update_pre_commit_repo_versions.assert_not_called()
-    printer.success.assert_called_with("All matched pre-commit hooks already in sync with the lockfile!")
+    printer.info.assert_called_with("All matched pre-commit hooks already in sync with the lockfile!")
 
 
 def test_get_pre_commit_repo_new_version() -> None:
