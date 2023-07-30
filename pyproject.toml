@@ -4,7 +4,7 @@ build-backend = "pdm.backend"
 
 [project]
 name = "sync-pre-commit-lock"
-version = "0.2.0"
+version = "0.2.1"
 description = "PDM plugin to sync your pre-commit versions with your lockfile, and install them, all automatically."
 authors = [{ name = "Gabriel Dugny", email = "sync-pre-commit-lock@dugny.me" }]
 dependencies = [
@@ -121,4 +121,4 @@ exclude_lines = [
 # We must configure Poetry as well 🤦
 [tool.poetry]
 name = "sync-pre-commit-lock"
-version = "0.1.0"
+version = "0.2.1"
