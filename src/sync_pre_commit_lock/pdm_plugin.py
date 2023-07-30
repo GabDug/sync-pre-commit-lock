@@ -89,9 +89,9 @@ def on_pdm_install_setup_pre_commit(
 def on_pdm_lock_check_pre_commit(
     project: Project, *, resolution: dict[str, Candidate], dry_run: bool, **kwargs: Any
 ) -> None:
-    plugin_config: SyncPreCommitLockConfig = load_config()
-    printer = PDMPrinter(project.core.ui)
     project_root: Path = project.root
+    plugin_config: SyncPreCommitLockConfig = load_config(project_root / project.PYPROJECT_FILENAME)
+    printer = PDMPrinter(project.core.ui)
 
     file_path = project_root / plugin_config.pre_commit_config_file
     resolved_packages: dict[str, GenericLockedPackage] = {
