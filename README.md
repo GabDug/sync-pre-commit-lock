@@ -67,11 +67,11 @@ Here is the default configuration:
 # Run `pre-commit install` automatically if applicable
 automaticall-install-hooks = true
 # Should we sync your pre-commit versions with your lockfile (when running lock, add, update, remove, etc.)?
-disable-sync-from_lock = false
+disable-sync-from-lock = false
 # Packages to ignore when syncing from lock
 ignore = []
 # Name of the pre-commit config file to sync with
-pre-commit-config-file = "pre-commit-config.yaml"
+pre-commit-config-file = ".pre-commit-config.yaml"
 # Additional mapping of URLs to python packages
 # Default is empty, but will merge with the default mapping
 # "rev" indicates the format of the Git tags
@@ -85,7 +85,21 @@ dependency-mapping = {"package-name"= {"repo"= "https://github.com/example/packa
 
 Once installed, and optionally configured, the plugin usage should be transparent, and trigger when you run applicable PDM or Poetry commands, like `pdm lock`, or `poetry lock`.
 
-There should be a message in the output, when the sync or install or pre-commit is triggered.
+> There should be a message in the output, when the sync or install or pre-commit is triggered.
+
+You can manually trigger the sync with the CLI command:
+
+```bash
+pdm sync-pre-commit
+```
+
+or
+
+```bash
+poetry sync-pre-commit
+```
+
+Both commands support `--dry-run` and verbosity options.
 
 ## Improvement ideas
 
@@ -103,6 +117,7 @@ Feel free to open an issue or a PR if you have any idea, or if you want to help!
 
 - [ ] Create a more verbose command
 - [ ] Add support for other lockfiles / project managers (pipenv, flit, hatch, etc.)
+- [X] Add a PDM/Poetry CLI command to sync manually
 - [ ] Add a dedicated CLI command to manage sync/install
 - [ ] Expose a pre-commit hook to sync the lockfile
 - [ ] Support nested params for some repos? Like mypy types
