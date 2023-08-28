@@ -16,7 +16,12 @@ jobs:
       id-token: write
 
     steps:
-    - uses: actions/checkout@v3
-    - uses: pdm-project/setup-pdm@v3
-    - name: Publish package distributions to PyPI
-      run: pdm publish
+      - uses: actions/checkout@v3
+      - uses: pdm-project/setup-pdm@v3
+      - name: Publish package distributions to PyPI
+        run: pdm publish
+      - name: Upload files to Github Release
+        uses: NBTX/upload-release-assets@v1
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          targets: dist/*
