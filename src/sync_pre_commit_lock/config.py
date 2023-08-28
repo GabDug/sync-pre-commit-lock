@@ -2,15 +2,13 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, TypeVar
+from typing import TYPE_CHECKING, Any
 
 try:
     # 3.11+
     import tomllib as toml  # type: ignore[import,unused-ignore]
 except ImportError:
     import tomli as toml  # type: ignore[no-redef,unused-ignore]
-
-_T = TypeVar("_T")
 
 
 if TYPE_CHECKING:

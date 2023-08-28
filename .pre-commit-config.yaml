@@ -1,3 +1,4 @@
+---
 default_language_version:
   python: python3.11
 repos:
@@ -18,7 +19,7 @@ repos:
     hooks:
       - id: black
 
-  - rev: v0.0.280
+  - rev: v0.0.286
     repo: https://github.com/charliermarsh/ruff-pre-commit
     hooks:
       - id: ruff

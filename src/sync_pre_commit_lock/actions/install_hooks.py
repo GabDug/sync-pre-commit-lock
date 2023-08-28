@@ -1,5 +1,5 @@
 # Modified from https://github.com/vstrimaitis/poetry-pre-commit-plugin/blob/master/src/poetry_pre_commit_plugin/plugin.py
-# Original code un GPLv3, written by Vytautas Strimaitis and contributors
+# Original code under GPLv3, written by Vytautas Strimaitis and contributors
 
 from __future__ import annotations
 
@@ -64,9 +64,10 @@ class SetupPreCommitHooks:
             output = subprocess.check_output(
                 self.check_pre_commit_version_command,  # noqa: S603
             ).decode()
-            return "pre-commit" in output
         except (subprocess.CalledProcessError, FileNotFoundError):
             return False
+        else:
+            return "pre-commit" in output
 
     @staticmethod
     def _are_pre_commit_hooks_installed(git_root: Path) -> bool:

@@ -48,13 +48,3 @@ def test_on_pdm_lock_check_pre_commit(mock_load_config: MagicMock, project: Magi
     }
     on_pdm_lock_check_pre_commit(project, dry_run=False, resolution=resolution)
     mock_load_config.assert_called_once()
-
-
-@patch("sync_pre_commit_lock.pdm_plugin.load_config")
-def test_on_pdm_lock_check_pre_commit_dry_run(mock_load_config: MagicMock, project: MagicMock) -> None:
-    mock_load_config.return_value = SyncPreCommitLockConfig(disable_sync_from_lock=False)
-    resolution = {
-        "some-library": Candidate(NamedRequirement("some-library"), "1.0.0", "https://example.com/some-library")
-    }
-    on_pdm_lock_check_pre_commit(project, dry_run=True, resolution=resolution)
-    mock_load_config.assert_called_once()

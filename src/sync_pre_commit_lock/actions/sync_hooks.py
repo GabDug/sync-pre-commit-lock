@@ -36,11 +36,8 @@ class SyncPreCommitHooksVersion:
     def execute(self) -> None:
         if self.plugin_config.disable_sync_from_lock:
             self.printer.debug("Sync pre-commit lock is disabled")
-            return None
+            return
 
-        if self.dry_run:
-            self.printer.debug("Dry run, skipping pre-commit hook check")
-            return None
         try:
             pre_commit_config_data = PreCommitHookConfig.from_yaml_file(self.pre_commit_config_file_path)
         except FileNotFoundError:
@@ -50,7 +47,7 @@ class SyncPreCommitHooksVersion:
             return
         except ValueError as e:
             self.printer.error(f"Invalid pre-commit config file: {self.pre_commit_config_file_path}: {e}")
-            return None
+            return
 
         mapping, mapping_reverse_by_url = self.build_mapping()
 
@@ -63,6 +60,9 @@ class SyncPreCommitHooksVersion:
         self.printer.info("Detected pre-commit hooks that can be updated to match the lockfile:")
         for repo, rev in to_fix.items():
             self.printer.info(f" - {repo.repo}: {repo.rev} -> {rev}")
+        if self.dry_run:
+            self.printer.info("Dry run, skipping pre-commit hook update.")
+            return
         pre_commit_config_data.update_pre_commit_repo_versions(to_fix)
         self.printer.success("Pre-commit hooks have been updated to match the lockfile!")
 
@@ -77,7 +77,8 @@ class SyncPreCommitHooksVersion:
             return None
 
         self.printer.debug(
-            f"Found mapping between pre-commit hook `{pre_commit_config_repo.repo}` and locked package `{locked_package.name}`."
+            f"Found mapping between pre-commit hook `{pre_commit_config_repo.repo}` and locked package"
+            f" `{locked_package.name}`."
         )
         formatted_rev = mapping_db_repo_info["rev"].replace("${rev}", str(locked_package.version))
         if formatted_rev != pre_commit_config_repo.rev:
@@ -87,10 +88,11 @@ class SyncPreCommitHooksVersion:
                 f" - Locked package version: {locked_package.version}"
             )
             return formatted_rev
-        else:
-            self.printer.debug(
-                f"Pre-commit hook {pre_commit_config_repo.repo} version already matches the version from the lockfile package."
-            )
+
+        self.printer.debug(
+            f"Pre-commit hook {pre_commit_config_repo.repo} version already matches the version from the lockfile"
+            " package."
+        )
         return None
 
     def build_mapping(self) -> tuple[PackageRepoMapping, dict[str, str]]:

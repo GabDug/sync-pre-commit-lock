@@ -30,7 +30,12 @@ def test_execute_returns_early_when_disabled() -> None:
     printer.debug.assert_called_once_with("Sync pre-commit lock is disabled")
 
 
-def test_execute_returns_early_during_dry_run() -> None:
+@patch("sync_pre_commit_lock.pre_commit_config.PreCommitHookConfig.from_yaml_file")
+@patch.object(SyncPreCommitHooksVersion, "build_mapping")
+@patch.object(SyncPreCommitHooksVersion, "analyze_repos")
+def test_execute_returns_early_during_dry_run(
+    mock_analyze_repos: MagicMock, mock_build_mapping: MagicMock, mock_from_yaml_file: MagicMock
+) -> None:
     printer = MagicMock(spec=Printer)
     pre_commit_config_file_path = MagicMock(spec=Path)
     locked_packages: dict[str, GenericLockedPackage] = {}
@@ -45,8 +50,20 @@ def test_execute_returns_early_during_dry_run() -> None:
         plugin_config=plugin_config,
         dry_run=dry_run,
     )
+
+    # Mocks
+    pre_commit_config = MagicMock(spec=PreCommitHookConfig)
+    mock_from_yaml_file.return_value = pre_commit_config
+    mock_build_mapping.return_value = ({}, {})
+    mock_analyze_repos.return_value = {PreCommitRepo("repo1", "rev1"): "rev2"}
+
     syncer.execute()
-    printer.debug.assert_called_once_with("Dry run, skipping pre-commit hook check")
+
+    # Assertions
+    mock_build_mapping.assert_called_once()
+    mock_analyze_repos.assert_called_once()
+    pre_commit_config.update_pre_commit_repo_versions.assert_not_called()
+    printer.info.assert_called_with("Dry run, skipping pre-commit hook update.")
 
 
 @patch("sync_pre_commit_lock.pre_commit_config.PreCommitHookConfig.from_yaml_file", side_effect=FileNotFoundError())

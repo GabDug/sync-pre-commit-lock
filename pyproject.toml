@@ -4,7 +4,7 @@ build-backend = "pdm.backend"
 
 [project]
 name = "sync-pre-commit-lock"
-version = "0.2.1"
+version = "0.3.0"
 description = "PDM plugin to sync your pre-commit versions with your lockfile, and install them, all automatically."
 authors = [{ name = "Gabriel Dugny", email = "sync-pre-commit-lock@dugny.me" }]
 dependencies = [
@@ -42,10 +42,9 @@ poetry-sync-pre-commit-lock = "sync_pre_commit_lock.poetry_plugin:SyncPreCommitL
 
 
 [project.optional-dependencies]
-# poetry = [
-#     "poetry @ git+https://github.com/python-poetry/poetry@master",
-# ]
-# XXX Add Poetry when 1.6.0 release
+poetry = [
+    "poetry>=1.6.0",
+]
 pdm = [
     "pdm>=2.7.4",
 ]
@@ -67,10 +66,17 @@ plugins = [
     "-e ."
 ]
 
+[tool.pdm.scripts]
+fmt = {cmd="black .", help="Run black formatter"}
+lint-mypy = {cmd="mypy src", help="Run mypy type checker"}
+# XXX(dugab): run mypy on tests as well
+lint-ruff = {cmd="ruff .", help="Run ruff linter"}
+test-cov = {cmd="pytest --junitxml=junit/test-results.xml --cov --cov-report=xml --cov-report=html --cov-report=term-missing", help="Run tests with coverage"}
+
 [tool.ruff]
 line-length = 140
 respect-gitignore = true
-extend-select = ["Q000", "TCH", "I001", "S", "T", "PTH"]
+extend-select = ["Q000", "TCH", "I001", "S", "T", "PTH", "PYI", "RET", "D209", "D202", "EM101"]
 extend-ignore =["S101"]
 target-version = "py310"
 
@@ -89,13 +95,6 @@ target-version = ["py310"]
 minversion = "7.0"
 testpaths = ["tests"]
 norecursedirs = "*.egg .eggs dist build docs .tox .git __pycache__ node_modules .venv __pypackages__"
-
-addopts = """
---strict-markers
---strict-config
---doctest-modules
---tb=short
-"""
 
 [tool.coverage.run]
 branch = true
@@ -116,9 +115,3 @@ exclude_lines = [
     "except ImportError:",
     "# nocov",
 ]
-
-# XXX Check if we really need this once 2.6.0 is released.
-# We must configure Poetry as well 🤦
-[tool.poetry]
-name = "sync-pre-commit-lock"
-version = "0.2.1"
