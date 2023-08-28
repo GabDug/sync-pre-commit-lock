@@ -1,8 +1,10 @@
+---
 # This workflow will install Python dependencies, run tests and lint with a variety of Python versions
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
 
 name: Python CI
 
+# yamllint disable-line rule:truthy
 on:
   push:
     branches: ["main"]
@@ -19,7 +21,7 @@ jobs:
       matrix:
         python-version: ["3.10", "3.11", "3.12"]
         # Empty is latest, head is latest from GitHub
-        pdm-version: ["", "head", "2.7.4", "2.8.0", "2.8.1"]
+        pdm-version: ["", "head", "2.7.4", "2.8.0", "2.8.1", "2.8.2"]
 
     steps:
     - uses: actions/checkout@v3
