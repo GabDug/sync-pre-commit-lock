@@ -38,9 +38,6 @@ class SyncPreCommitHooksVersion:
             self.printer.debug("Sync pre-commit lock is disabled")
             return
 
-        if self.dry_run:
-            self.printer.debug("Dry run, skipping pre-commit hook check")
-            return
         try:
             pre_commit_config_data = PreCommitHookConfig.from_yaml_file(self.pre_commit_config_file_path)
         except FileNotFoundError:
@@ -63,6 +60,9 @@ class SyncPreCommitHooksVersion:
         self.printer.info("Detected pre-commit hooks that can be updated to match the lockfile:")
         for repo, rev in to_fix.items():
             self.printer.info(f" - {repo.repo}: {repo.rev} -> {rev}")
+        if self.dry_run:
+            self.printer.info("Dry run, skipping pre-commit hook update.")
+            return
         pre_commit_config_data.update_pre_commit_repo_versions(to_fix)
         self.printer.success("Pre-commit hooks have been updated to match the lockfile!")
 
