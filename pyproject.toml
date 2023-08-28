@@ -68,7 +68,10 @@ plugins = [
 
 [tool.pdm.scripts]
 fmt = {cmd="black .", help="Run black formatter"}
+lint-mypy = {cmd="mypy src", help="Run mypy type checker"}
+# XXX(dugab): run mypy on tests as well
 lint-ruff = {cmd="ruff .", help="Run ruff linter"}
+test-cov = {cmd="pytest --junitxml=junit/test-results.xml --cov --cov-report=xml --cov-report=html --cov-report=term-missing", help="Run tests with coverage"}
 
 [tool.ruff]
 line-length = 140
@@ -92,13 +95,6 @@ target-version = ["py310"]
 minversion = "7.0"
 testpaths = ["tests"]
 norecursedirs = "*.egg .eggs dist build docs .tox .git __pycache__ node_modules .venv __pypackages__"
-
-addopts = """
---strict-markers
---strict-config
---doctest-modules
---tb=short
-"""
 
 [tool.coverage.run]
 branch = true

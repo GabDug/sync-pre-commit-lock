@@ -110,7 +110,7 @@ Feel free to open an issue or a PR if you have any idea, or if you want to help!
 - [ ] Upload build artifacts on GitHub release
 - [ ] Add a changelog
 - [ ] Add "E2E" tests
-- [ ] Add PDM scripts for dev and CI
+- [X] Add PDM scripts for dev and CI
 - [ ] Add docs
 
 ### Features or fixes

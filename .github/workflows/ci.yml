@@ -67,7 +67,7 @@ jobs:
 
       - name: Test with pytest
         run: |
-          pdm run pytest --junitxml=junit/test-results.xml --cov  --cov-report=xml --cov-report=html
+          pdm run test-cov
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
         with:
@@ -77,14 +77,12 @@ jobs:
 
       - name: Type check with mypy
         run: |
-          pdm run mypy src
-          # XXX Mypy on tests as well
+          pdm run lint-mypy
       - name: Lint with ruff
         run: |
-          pdm run ruff src tests --format=github --exit-non-zero-on-fix
+          pdm run lint-ruff --format=github --exit-non-zero-on-fix
       - name: Build with pdm
         run: |
           pdm build
           # Do not upload to PyPI, here we only want to check that the build works
-      # XXX Check valid wheels
-      # XXX Report coverage/junit?
+      # XXX Check valid wheels?
