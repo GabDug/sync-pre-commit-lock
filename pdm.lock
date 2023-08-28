@@ -2,7 +2,7 @@
 # It is not intended for manual editing.
 
 [metadata]
-groups = ["default", "dev", "pdm"]
+groups = ["default", "dev", "pdm", "poetry"]
 cross_platform = true
 static_urls = false
 lock_version = "4.3"
@@ -422,12 +422,15 @@ files = [
 
 [[package]]
 name = "filelock"
-version = "3.12.2"
-requires_python = ">=3.7"
+version = "3.12.3"
+requires_python = ">=3.8"
 summary = "A platform independent file lock."
+dependencies = [
+    "typing-extensions>=4.7.1; python_version < \"3.11\"",
+]
 files = [
-    {file = "filelock-3.12.2-py3-none-any.whl", hash = "sha256:cbb791cdea2a72f23da6ac5b5269ab0a0d161e9ef0100e653b69049a7706d1ec"},
-    {file = "filelock-3.12.2.tar.gz", hash = "sha256:002740518d8aa59a26b0c76e10fb8c6e15eae825d34b6fdf670333fd7b938d81"},
+    {file = "filelock-3.12.3-py3-none-any.whl", hash = "sha256:f067e40ccc40f2b48395a80fcbd4728262fab54e232e090a4063ab804179efeb"},
+    {file = "filelock-3.12.3.tar.gz", hash = "sha256:0ecc1dd2ec4672a10c8550a8182f1bd0c0a5088470ecd5a125e45f49472fac3d"},
 ]
 
 [[package]]
@@ -445,12 +448,12 @@ files = [
 
 [[package]]
 name = "identify"
-version = "2.5.26"
+version = "2.5.27"
 requires_python = ">=3.8"
 summary = "File identification library for Python"
 files = [
-    {file = "identify-2.5.26-py2.py3-none-any.whl", hash = "sha256:c22a8ead0d4ca11f1edd6c9418c3220669b3b7533ada0a0ffa6cc0ef85cf9b54"},
-    {file = "identify-2.5.26.tar.gz", hash = "sha256:7243800bce2f58404ed41b7c002e53d4d22bcf3ae1b7900c2d7aefd95394bf7f"},
+    {file = "identify-2.5.27-py2.py3-none-any.whl", hash = "sha256:fdb527b2dfe24602809b2201e033c2a113d7bdf716db3ca8e3243f735dcecaba"},
+    {file = "identify-2.5.27.tar.gz", hash = "sha256:287b75b04a0e22d727bc9a41f0d4f3c1bcada97490fa6eabb5b28f0e9097e733"},
 ]
 
 [[package]]
@@ -749,17 +752,17 @@ files = [
 
 [[package]]
 name = "pluggy"
-version = "1.2.0"
-requires_python = ">=3.7"
+version = "1.3.0"
+requires_python = ">=3.8"
 summary = "plugin and hook calling mechanisms for python"
 files = [
-    {file = "pluggy-1.2.0-py3-none-any.whl", hash = "sha256:c2fd55a7d7a3863cba1a013e4e2414658b1d07b6bc57b3919e0c63c9abb99849"},
-    {file = "pluggy-1.2.0.tar.gz", hash = "sha256:d12f0c4b579b15f5e054301bb226ee85eeeba08ffec228092f8defbaa3a4c4b3"},
+    {file = "pluggy-1.3.0-py3-none-any.whl", hash = "sha256:d89c696a773f8bd377d18e5ecda92b7a3793cbe66c87060a6fb58c7b6e1061f7"},
+    {file = "pluggy-1.3.0.tar.gz", hash = "sha256:cf61ae8f126ac6f7c451172cf30e3e43d3ca77615509771b3a984a0730651e12"},
 ]
 
 [[package]]
 name = "poetry"
-version = "1.6.0"
+version = "1.6.1"
 requires_python = ">=3.8,<4.0"
 summary = "Python dependency management and packaging made easy."
 dependencies = [
@@ -779,7 +782,7 @@ dependencies = [
     "poetry-plugin-export<2.0.0,>=1.5.0",
     "pyproject-hooks<2.0.0,>=1.0.0",
     "requests-toolbelt<2,>=0.9.1",
-    "requests<3.0,>=2.18",
+    "requests<3.0,>=2.26",
     "shellingham<2.0,>=1.5",
     "tomli<3.0.0,>=2.0.1; python_version < \"3.11\"",
     "tomlkit<1.0.0,>=0.11.4",
@@ -788,8 +791,8 @@ dependencies = [
     "xattr<0.11.0,>=0.10.0; sys_platform == \"darwin\"",
 ]
 files = [
-    {file = "poetry-1.6.0-py3-none-any.whl", hash = "sha256:3b0b0a5f1e556115a48950f1ae20bd62431c9390188a3372c8d7da5f1a8a3a38"},
-    {file = "poetry-1.6.0.tar.gz", hash = "sha256:77324092ab3b3f975a87a2893a53152cbac7853c8359204b828f0d96f078e4c7"},
+    {file = "poetry-1.6.1-py3-none-any.whl", hash = "sha256:9b4cb6079c08cc0d91e8cba18a6bd4d4f7d7830263a7fb18ecb3faa77937c988"},
+    {file = "poetry-1.6.1.tar.gz", hash = "sha256:0ab9b1a592731cc8b252b8d6aaeea19c72cc0a109d7468b829ad57e6c48039d2"},
 ]
 
 [[package]]
