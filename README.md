@@ -17,12 +17,13 @@ PDM and Poetry plugin to sync your pre-commit versions with your lockfile and au
 - 🔁 Sync pre-commit versions with your lockfile
 - ⏩ Run every time you run the lockfile is updated, not as a pre-commit hook
 - 🔄 Install pre-commit hooks automatically, no need to run `pre-commit install` manually
+- 💫 Preserve your pre-commit config file formatting
 
 ## Supported versions
 
 - Python 3.10+
 - PDM 2.7.4+
-- Poetry 1.6.0+ (currently in development)
+- Poetry 1.6.0+
 
 ## Installation
 
