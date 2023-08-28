@@ -3,9 +3,13 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING, ClassVar
 
+from cleo.commands.command import Command
 from cleo.events.console_events import TERMINATE
 from cleo.events.console_terminate_event import ConsoleTerminateEvent
+from cleo.exceptions import CleoValueError
+from cleo.helpers import option
 from cleo.io.outputs.output import Verbosity
+from poetry.console.application import Application
 from poetry.console.commands.add import AddCommand
 from poetry.console.commands.install import InstallCommand
 from poetry.console.commands.lock import LockCommand
@@ -24,7 +28,6 @@ if TYPE_CHECKING:
     from cleo.events.event import Event
     from cleo.events.event_dispatcher import EventDispatcher
     from cleo.io.io import IO
-    from poetry.console.application import Application
 
 
 class PoetryPrinter(Printer):
@@ -53,13 +56,28 @@ class PoetrySetupPreCommitHooks(SetupPreCommitHooks):
     check_pre_commit_version_command: ClassVar[Sequence[str | bytes]] = ["poetry", "run", "pre-commit", "--version"]
 
 
+def run_sync_pre_commit_version(printer: PoetryPrinter, dry_run: bool, application: Application) -> None:
+    poetry_locked_packages = application.poetry.locker.locked_repository().packages
+    locked_packages = {str(p.name): GenericLockedPackage(p.name, str(p.version)) for p in poetry_locked_packages}
+    plugin_config = load_config()
+    file_path = Path().cwd() / plugin_config.pre_commit_config_file
+
+    SyncPreCommitHooksVersion(
+        printer,
+        pre_commit_config_file_path=file_path,
+        plugin_config=plugin_config,
+        locked_packages=locked_packages,
+        dry_run=dry_run,
+    ).execute()
+
+
 class SyncPreCommitLockPlugin(ApplicationPlugin):
     application: Application | None
 
     def activate(self, application: Application) -> None:
         assert application.event_dispatcher is not None
         application.event_dispatcher.add_listener(TERMINATE, self._handle_post_command)
-
+        application.command_loader.register_factory("sync-pre-commit", sync_pre_commit_poetry_command_factory)
         self.application = application
 
     def _handle_post_command(
@@ -72,7 +90,10 @@ class SyncPreCommitLockPlugin(ApplicationPlugin):
 
         command = event.command
         printer = PoetryPrinter(event.io)
-        dry_run: bool = bool(command.option("dry-run"))
+        try:
+            dry_run: bool = bool(command.option("dry-run"))
+        except CleoValueError:
+            dry_run = False
 
         if isinstance(command, SelfCommand):
             printer.debug("Poetry pre-commit plugin does not run for 'self' command.")
@@ -87,17 +108,30 @@ class SyncPreCommitLockPlugin(ApplicationPlugin):
                 raise RuntimeError(msg)
 
             # Get all locked dependencies from self.application
-            poetry_locked_packages = self.application.poetry.locker.locked_repository().packages
-            locked_packages = {
-                str(p.name): GenericLockedPackage(p.name, str(p.version)) for p in poetry_locked_packages
-            }
-            plugin_config = load_config()
-            file_path = Path().cwd() / plugin_config.pre_commit_config_file
+            run_sync_pre_commit_version(printer, dry_run, self.application)
 
-            SyncPreCommitHooksVersion(
-                printer,
-                pre_commit_config_file_path=file_path,
-                plugin_config=plugin_config,
-                locked_packages=locked_packages,
-                dry_run=dry_run,
-            ).execute()
+
+class SyncPreCommitPoetryCommand(Command):
+    name = "sync-pre-commit"
+    description = "Sync `.pre-commit-config.yaml` hooks versions with the lockfile"
+    help = "Sync `.pre-commit-config.yaml` hooks versions with the lockfile"
+    options = [
+        option(
+            "dry-run",
+            None,
+            "Output the operations but do not update the pre-commit file.",
+        ),
+    ]
+
+    def handle(self) -> int:
+        # XXX(dugab): handle return codes
+        if not self.application:
+            msg = "self.application is None"
+            raise RuntimeError(msg)
+        assert isinstance(self.application, Application)
+        run_sync_pre_commit_version(PoetryPrinter(self.io), False, self.application)
+        return 0
+
+
+def sync_pre_commit_poetry_command_factory() -> SyncPreCommitPoetryCommand:
+    return SyncPreCommitPoetryCommand()
