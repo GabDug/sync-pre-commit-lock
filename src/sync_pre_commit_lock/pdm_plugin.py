@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, ClassVar
 
+from pdm.cli.commands.base import BaseCommand
+from pdm.cli.options import dry_run_option
 from pdm.signals import post_install, post_lock
 from pdm.termui import Verbosity
 
@@ -13,6 +15,7 @@ from sync_pre_commit_lock.actions.sync_hooks import GenericLockedPackage, SyncPr
 from sync_pre_commit_lock.config import SyncPreCommitLockConfig, load_config
 
 if TYPE_CHECKING:
+    import argparse
     from collections.abc import Sequence
     from pathlib import Path
 
@@ -50,6 +53,7 @@ class PDMPrinter(Printer):
 
 def register_pdm_plugin(core: Core) -> None:
     """Register the plugin to PDM Core."""
+    core.register_command(SyncPreCommitVersionsPDMCommand, "sync-pre-commit")
     printer = PDMPrinter(core.ui)
     printer.debug("Registered sync-pre-commit-lock plugin.")
 
@@ -105,3 +109,17 @@ def on_pdm_lock_check_pre_commit(
         dry_run=dry_run,
     )
     action.execute()
+
+
+class SyncPreCommitVersionsPDMCommand(BaseCommand):
+    """Sync `.pre-commit-config.yaml` hooks versions with the lockfile"""
+
+    # The class docstring acts as the description of the command, don't make it longer!
+
+    def add_arguments(self, parser: argparse.ArgumentParser) -> None:
+        dry_run_option.add_to_parser(parser)
+
+    def handle(self, project: Project, options: argparse.Namespace) -> None:
+        candidates = project.locked_repository.all_candidates
+
+        on_pdm_lock_check_pre_commit(project, resolution=candidates, dry_run=options.dry_run)

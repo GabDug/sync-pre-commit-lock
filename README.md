@@ -48,7 +48,13 @@ plugins = [
 
 ### For Poetry
 
-Install like any other Poetry plugin, but beware that it's still in development!
+Install [like any other Poetry plugin](https://python-poetry.org/docs/master/plugins/#using-plugins), e.g.:
+
+```bash
+poetry self plugin add "sync-pre-commit-lock[poetry]"
+```
+
+> Only Poetry 1.6.0+ is supported.
 
 ## Configuration
 
@@ -77,7 +83,7 @@ dependency-mapping = {"package-name"= {"repo"= "https://github.com/example/packa
 
 ## Usage
 
-Once installed, and optionally configured, the plugin usage should be transparent, and trigger when you run applicable PDM or Poetry commands.
+Once installed, and optionally configured, the plugin usage should be transparent, and trigger when you run applicable PDM or Poetry commands, like `pdm lock`, or `poetry lock`.
 
 There should be a message in the output, when the sync or install or pre-commit is triggered.
 
