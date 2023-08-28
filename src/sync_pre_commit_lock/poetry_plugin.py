@@ -83,7 +83,8 @@ class SyncPreCommitLockPlugin(ApplicationPlugin):
 
         if any(isinstance(command, t) for t in [InstallCommand, AddCommand, LockCommand, UpdateCommand]):
             if self.application is None:
-                raise RuntimeError("self.application is None")
+                msg = "self.application is None"
+                raise RuntimeError(msg)
 
             # Get all locked dependencies from self.application
             poetry_locked_packages = self.application.poetry.locker.locked_repository().packages

@@ -73,12 +73,12 @@ def on_pdm_install_setup_pre_commit(
 
     if not plugin_config.automatically_install_hooks:
         printer.debug("Automatically installing pre-commit hooks is disabled. Skipping.")
-        return None
+        return
     action = PDMSetupPreCommitHooks(printer, dry_run=dry_run)
     file_path = project.root / plugin_config.pre_commit_config_file
     if not file_path.exists():
         printer.info("No pre-commit config file found, skipping pre-commit hook check")
-        return None
+        return
 
     printer.debug("Pre-commit config file found. Setting up pre-commit hooks...")
 

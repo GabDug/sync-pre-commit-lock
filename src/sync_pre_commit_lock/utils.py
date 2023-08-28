@@ -4,7 +4,8 @@ from urllib.parse import urlparse, urlunparse
 def normalize_git_url(url: str) -> str:
     """Normalize a git URL to https://, remove .git from the end of the path, and lowercase the hostname.
 
-    If the URL is malformed, return the original URL."""
+    If the URL is malformed, return the original URL.
+    """
     # Ignore local paths
     if "://" not in url:
         return url

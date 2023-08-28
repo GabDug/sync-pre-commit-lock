@@ -78,7 +78,6 @@ class PreCommitHookConfig:
     @cached_property
     def document_start_offset(self) -> int:
         """Return the line number where the YAML document starts."""
-
         lines = self.raw_file_contents.split("\n")
         for i, line in enumerate(lines):
             # Trim leading/trailing whitespaces
@@ -93,7 +92,6 @@ class PreCommitHookConfig:
 
     def update_pre_commit_repo_versions(self, new_versions: dict[PreCommitRepo, str]) -> None:
         """Fix the pre-commit hooks to match the lockfile. Preserve comments and formatting as much as possible."""
-
         if len(new_versions) == 0:
             return
 
@@ -118,6 +116,7 @@ class PreCommitHookConfig:
         change_count = sum(1 for change in changes if change[0] in ["+", "-"])
 
         if change_count == 0:
-            raise RuntimeError("No changes to write, this should not happen")
+            msg = "No changes to write, this should not happen"
+            raise RuntimeError(msg)
         with self.pre_commit_config_file_path.open("w") as stream:
             stream.writelines(updated_lines)
