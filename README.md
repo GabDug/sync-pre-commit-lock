@@ -32,7 +32,7 @@ PDM and Poetry plugin to sync your pre-commit versions with your lockfile and au
 Install it [just like any other PDM plugin](https://pdm.fming.dev/latest/dev/write/#activate-the-plugin):
 
 ```bash
-pdm self add "sync-pre-commit-lock[pdm]""
+pdm self add "sync-pre-commit-lock[pdm]"
 ```
 
 Optionally, you can also specify [the plugin in your project](https://pdm.fming.dev/latest/dev/write/#specify-the-plugins-in-project) `pyproject.toml`, to make it installable with `pdm install --plugins`:
