@@ -30,13 +30,13 @@ if TYPE_CHECKING:
 class PDMPrinter(Printer):
     success_list_token: str = f"[success]{termui.Emoji.SUCC}[/]"
 
-    def __init__(self, ui: UI, **_: Any):
+    def __init__(self, ui: UI, with_prefix: bool = True, **_: Any):
         self.ui = ui
-        self.plugin_prefix = "\\[sync-pre-commit-lock]"
+        self.plugin_prefix = "\\[sync-pre-commit-lock] " if with_prefix else ""
 
     def prefix_lines(self, msg: str) -> str:
         lines = msg.split("\n")
-        return "\n".join(f"{self.plugin_prefix} {line}" for line in lines)
+        return "\n".join(f"{self.plugin_prefix}{line}" for line in lines)
 
     def debug(self, msg: str) -> None:
         self.ui.echo(self.prefix_lines("[debug]" + msg + "[/debug]"), verbosity=Verbosity.DEBUG)
@@ -94,11 +94,11 @@ def on_pdm_install_setup_pre_commit(
 
 @post_lock.connect
 def on_pdm_lock_check_pre_commit(
-    project: Project, *, resolution: dict[str, Candidate], dry_run: bool, **kwargs: Any
+    project: Project, *, resolution: dict[str, Candidate], dry_run: bool, with_prefix: bool = True, **kwargs: Any
 ) -> None:
     project_root: Path = project.root
     plugin_config: SyncPreCommitLockConfig = load_config(project_root / project.PYPROJECT_FILENAME)
-    printer = PDMPrinter(project.core.ui)
+    printer = PDMPrinter(project.core.ui, with_prefix=with_prefix)
 
     file_path = project_root / plugin_config.pre_commit_config_file
     resolved_packages: dict[str, GenericLockedPackage] = {
@@ -125,4 +125,4 @@ class SyncPreCommitVersionsPDMCommand(BaseCommand):
     def handle(self, project: Project, options: argparse.Namespace) -> None:
         candidates = project.locked_repository.all_candidates
 
-        on_pdm_lock_check_pre_commit(project, resolution=candidates, dry_run=options.dry_run)
+        on_pdm_lock_check_pre_commit(project, resolution=candidates, dry_run=options.dry_run, with_prefix=False)

@@ -33,21 +33,21 @@ if TYPE_CHECKING:
 class PoetryPrinter(Printer):
     success_list_token: str = "<fg=green;options=bold>•</>"
 
-    def __init__(self, io: IO) -> None:
+    def __init__(self, io: IO, with_prefix: bool = True) -> None:
         self.io = io
-        self.plugin_prefix = "[sync-pre-commit-lock]"
+        self.plugin_prefix = "[sync-pre-commit-lock] " if with_prefix else ""
 
     def debug(self, msg: str) -> None:
-        self.io.write_line(f"<info>{self.plugin_prefix} {msg}</info>", verbosity=Verbosity.DEBUG)
+        self.io.write_line(f"<info>{self.plugin_prefix}{msg}</info>", verbosity=Verbosity.DEBUG)
 
     def info(self, msg: str) -> None:
-        self.io.write_line(f"<info>{self.plugin_prefix} {msg}</info>", verbosity=Verbosity.NORMAL)
+        self.io.write_line(f"<info>{self.plugin_prefix}{msg}</info>", verbosity=Verbosity.NORMAL)
 
     def warning(self, msg: str) -> None:
-        return self.io.write_line(f"<warning>{self.plugin_prefix} {msg}</warning>", verbosity=Verbosity.NORMAL)
+        return self.io.write_line(f"<warning>{self.plugin_prefix}{msg}</warning>", verbosity=Verbosity.NORMAL)
 
     def error(self, msg: str) -> None:
-        return self.io.write_error_line(f"<error>{self.plugin_prefix} {msg}</error>", verbosity=Verbosity.NORMAL)
+        return self.io.write_error_line(f"<error>{self.plugin_prefix}{msg}</error>", verbosity=Verbosity.NORMAL)
 
     def success(self, msg: str) -> None:
         return self.io.write_line(f"<success>{self.plugin_prefix} {msg}</success>", verbosity=Verbosity.NORMAL)
@@ -131,7 +131,7 @@ class SyncPreCommitPoetryCommand(Command):
             msg = "self.application is None"
             raise RuntimeError(msg)
         assert isinstance(self.application, Application)
-        run_sync_pre_commit_version(PoetryPrinter(self.io), False, self.application)
+        run_sync_pre_commit_version(PoetryPrinter(self.io, with_prefix=False), False, self.application)
         return 0
 
 
