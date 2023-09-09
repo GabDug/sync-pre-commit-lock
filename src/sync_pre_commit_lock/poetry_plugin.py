@@ -31,6 +31,8 @@ if TYPE_CHECKING:
 
 
 class PoetryPrinter(Printer):
+    success_list_token: str = "<fg=green;options=bold>•</>"
+
     def __init__(self, io: IO) -> None:
         self.io = io
         self.plugin_prefix = "[sync-pre-commit-lock]"

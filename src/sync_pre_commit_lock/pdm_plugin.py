@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, ClassVar
 
+from pdm import termui
 from pdm.cli.commands.base import BaseCommand
 from pdm.cli.options import dry_run_option
 from pdm.signals import post_install, post_lock
@@ -27,6 +28,8 @@ if TYPE_CHECKING:
 
 
 class PDMPrinter(Printer):
+    success_list_token: str = f"[success]{termui.Emoji.SUCC}[/]"
+
     def __init__(self, ui: UI, **_: Any):
         self.ui = ui
         self.plugin_prefix = "\\[sync-pre-commit-lock]"
