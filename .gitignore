@@ -161,3 +161,5 @@ cython_debug/
 .pdm-python
 .idea
 junit
+.pdm-build
+src/sync_pre_commit_lock/_version.py
