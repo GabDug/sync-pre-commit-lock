@@ -54,8 +54,8 @@ def test_execute_returns_early_during_dry_run(
     # Mocks
     pre_commit_config = MagicMock(spec=PreCommitHookConfig)
     mock_from_yaml_file.return_value = pre_commit_config
-    mock_build_mapping.return_value = ({}, {})
-    mock_analyze_repos.return_value = {PreCommitRepo("repo1", "rev1"): "rev2"}
+    mock_build_mapping.return_value = ({}, {"repo1": "somepkg"})
+    mock_analyze_repos.return_value = {PreCommitRepo("repo1", "rev1"): "rev2"}, {}
 
     syncer.execute()
 
@@ -116,6 +116,7 @@ def test_execute_synchronizes_hooks(
 ) -> None:
     printer = MagicMock(spec=Printer)
     pre_commit_config_file_path = MagicMock(spec=Path)
+    pre_commit_config_file_path.name = ".pre-commit-config.yaml"
     locked_packages: dict[str, GenericLockedPackage] = {}
     plugin_config = MagicMock(spec=SyncPreCommitLockConfig)
     plugin_config.disable_sync_from_lock = False
@@ -132,8 +133,8 @@ def test_execute_synchronizes_hooks(
     # Mocks
     pre_commit_config = MagicMock(spec=PreCommitHookConfig)
     mock_from_yaml_file.return_value = pre_commit_config
-    mock_build_mapping.return_value = ({}, {})
-    mock_analyze_repos.return_value = {PreCommitRepo("repo1", "rev1"): "rev2"}
+    mock_build_mapping.return_value = ({}, {"repo1": "somepkg"})
+    mock_analyze_repos.return_value = {PreCommitRepo("repo1", "rev1"): "rev2"}, {}
 
     syncer.execute()
 
@@ -141,13 +142,13 @@ def test_execute_synchronizes_hooks(
     mock_build_mapping.assert_called_once()
     mock_analyze_repos.assert_called_once()
     pre_commit_config.update_pre_commit_repo_versions.assert_called_once_with({PreCommitRepo("repo1", "rev1"): "rev2"})
-    printer.success.assert_called_with("Pre-commit hooks have been updated to match the lockfile!")
+    printer.success.assert_called_with("Pre-commit hooks have been updated in .pre-commit-config.yaml!")
 
 
 @patch("sync_pre_commit_lock.pre_commit_config.PreCommitHookConfig.from_yaml_file")
 @patch.object(SyncPreCommitHooksVersion, "build_mapping")
 @patch.object(SyncPreCommitHooksVersion, "analyze_repos")
-def test_execute_synchronizes_hooks_all_good(
+def test_execute_synchronizes_hooks_no_match(
     mock_analyze_repos: MagicMock, mock_build_mapping: MagicMock, mock_from_yaml_file: MagicMock
 ) -> None:
     printer = MagicMock(spec=Printer)
@@ -169,7 +170,7 @@ def test_execute_synchronizes_hooks_all_good(
     pre_commit_config = MagicMock(spec=PreCommitHookConfig)
     mock_from_yaml_file.return_value = pre_commit_config
     mock_build_mapping.return_value = ({}, {})
-    mock_analyze_repos.return_value = {}
+    mock_analyze_repos.return_value = {}, {}
 
     syncer.execute()
 
@@ -177,7 +178,7 @@ def test_execute_synchronizes_hooks_all_good(
     mock_build_mapping.assert_called_once()
     mock_analyze_repos.assert_called_once()
     pre_commit_config.update_pre_commit_repo_versions.assert_not_called()
-    printer.info.assert_called_with("All matched pre-commit hooks already in sync with the lockfile!")
+    printer.info.assert_called_with("No pre-commit hook detected that matches a locked package.")
 
 
 def test_get_pre_commit_repo_new_version() -> None:
@@ -220,7 +221,7 @@ def test_analyze_repos(mock_get_pre_commit_repo_new_version: MagicMock) -> None:
     mapping: PackageRepoMapping = {"lib_name": {"repo": "https://repo_url", "rev": "${rev}"}}
     mapping_reverse_by_url = {"https://repo_url": "lib_name"}
 
-    to_fix = syncer.analyze_repos(pre_commit_repos, mapping, mapping_reverse_by_url)
+    to_fix, _ = syncer.analyze_repos(pre_commit_repos, mapping, mapping_reverse_by_url)
 
     assert to_fix == {PreCommitRepo("https://repo_url", "1.2.3"): "2.0.0"}
 
@@ -310,7 +311,7 @@ def test_analyze_repos_repo_not_in_mapping() -> None:
     mapping: PackageRepoMapping = {}
     mapping_reverse_by_url: dict[str, str] = {}
 
-    result = syncer.analyze_repos(pre_commit_repos, mapping, mapping_reverse_by_url)
+    result, _ = syncer.analyze_repos(pre_commit_repos, mapping, mapping_reverse_by_url)
 
     assert result == {}
 
@@ -332,7 +333,7 @@ def test_analyze_repos_dependency_not_locked() -> None:
     mapping: PackageRepoMapping = {"lib_name": {"repo": "repo_url", "rev": "${rev}"}}
     mapping_reverse_by_url = {"repo_url": "lib_name"}
 
-    result = syncer.analyze_repos(pre_commit_repos, mapping, mapping_reverse_by_url)
+    result, _ = syncer.analyze_repos(pre_commit_repos, mapping, mapping_reverse_by_url)
 
     assert result == {}
 
@@ -355,6 +356,6 @@ def test_analyze_repos_no_new_version() -> None:
     mapping = {"lib_name": RepoInfo(repo="repo_url", rev="${rev}")}
     mapping_reverse_by_url = {"repo_url": "lib_name"}
 
-    result = syncer.analyze_repos(pre_commit_repos, mapping, mapping_reverse_by_url)
+    result, _ = syncer.analyze_repos(pre_commit_repos, mapping, mapping_reverse_by_url)
 
     assert result == {}

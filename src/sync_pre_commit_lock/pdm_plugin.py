@@ -26,6 +26,8 @@ if TYPE_CHECKING:
     from pdm.project import Project
     from pdm.termui import UI
 
+    from sync_pre_commit_lock.pre_commit_config import PreCommitRepo
+
 
 class PDMPrinter(Printer):
     success_list_token: str = f"[success]{termui.Emoji.SUCC}[/]"
@@ -52,6 +54,28 @@ class PDMPrinter(Printer):
 
     def success(self, msg: str) -> None:
         self.ui.echo("[success]" + self.prefix_lines(msg) + "[/success]", verbosity=Verbosity.NORMAL)
+
+    def _format_repo_url(self, repo_url: str, package_name: str) -> str:
+        return repo_url.replace(package_name, f"[cyan][bold]{package_name}[/bold][/cyan]")
+
+    def list_updated_packages(self, packages: dict[str, tuple[PreCommitRepo, str]]) -> None:
+        """
+        Args:
+            packages: Dict of package name -> (repo, new_rev)
+        """
+        self.ui.display_columns(
+            [
+                (
+                    "[info]" + self.plugin_prefix + "[/info]" + " " + self.success_list_token,
+                    "[info]" + self._format_repo_url(repo[0].repo, package) + "[/info]",
+                    " ",
+                    "[error]" + repo[0].rev + "[/error]",
+                    "[info]" + "->" + "[/info]",
+                    "[green]" + repo[1] + "[/green]",
+                )
+                for package, repo in packages.items()
+            ]
+        )
 
 
 def register_pdm_plugin(core: Core) -> None:

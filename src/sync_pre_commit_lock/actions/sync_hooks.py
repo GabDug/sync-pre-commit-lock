@@ -50,21 +50,27 @@ class SyncPreCommitHooksVersion:
             return
 
         mapping, mapping_reverse_by_url = self.build_mapping()
+        # XXX We should have the list of packages mapped, but already up to date and print it
+        to_fix, in_sync = self.analyze_repos(pre_commit_config_data.repos_normalized, mapping, mapping_reverse_by_url)
 
-        to_fix = self.analyze_repos(pre_commit_config_data.repos_normalized, mapping, mapping_reverse_by_url)
-
+        if len(to_fix) == 0 and len(in_sync) == 0:
+            self.printer.info("No pre-commit hook detected that matches a locked package.")
+            return
         if len(to_fix) == 0:
-            self.printer.info("All matched pre-commit hooks already in sync with the lockfile!")
+            packages_str = ", ".join(f"{mapping_reverse_by_url[repo.repo]} ({rev})" for repo, rev in in_sync.items())
+            self.printer.info(f"All pre-commit hooks are already up to date with the lockfile: {packages_str}")
             return
 
         self.printer.info("Detected pre-commit hooks that can be updated to match the lockfile:")
-        for repo, rev in to_fix.items():
-            self.printer.info(f" - {repo.repo}: {repo.rev} -> {rev}")
+        self.printer.list_updated_packages(
+            {mapping_reverse_by_url[repo.repo]: (repo, new_ver) for repo, new_ver in to_fix.items()}
+        )
+
         if self.dry_run:
             self.printer.info("Dry run, skipping pre-commit hook update.")
             return
         pre_commit_config_data.update_pre_commit_repo_versions(to_fix)
-        self.printer.success("Pre-commit hooks have been updated to match the lockfile!")
+        self.printer.success(f"Pre-commit hooks have been updated in {self.pre_commit_config_file_path.name}!")
 
     def get_pre_commit_repo_new_version(
         self,
@@ -110,8 +116,9 @@ class SyncPreCommitHooksVersion:
         pre_commit_repos: set[PreCommitRepo],
         mapping: PackageRepoMapping,
         mapping_reverse_by_url: dict[str, str],
-    ) -> dict[PreCommitRepo, str]:
+    ) -> tuple[dict[PreCommitRepo, str], dict[PreCommitRepo, str]]:
         to_fix: dict[PreCommitRepo, str] = {}
+        in_sync: dict[PreCommitRepo, str] = {}
         for pre_commit_repo in pre_commit_repos:
             if pre_commit_repo.repo not in mapping_reverse_by_url:
                 self.printer.debug(f"Pre-commit hook {pre_commit_repo.repo} not found in the DB mapping")
@@ -122,8 +129,8 @@ class SyncPreCommitHooksVersion:
             dependency_locked = self.locked_packages.get(dependency_name)
 
             if not dependency_locked:
-                self.printer.info(
-                    f"Pre-commit hook {pre_commit_repo.repo} has a mapping to Python package `{dependency_name}`,"
+                self.printer.debug(
+                    f"Pre-commit hook {pre_commit_repo.repo} has a mapping to Python package `{dependency_name}`, "
                     "but was not found in the lockfile"
                 )
                 continue
@@ -131,5 +138,7 @@ class SyncPreCommitHooksVersion:
             new_ver = self.get_pre_commit_repo_new_version(pre_commit_repo, dependency, dependency_locked)
             if new_ver:
                 to_fix[pre_commit_repo] = new_ver
+            else:
+                in_sync[pre_commit_repo] = dependency_locked.version
 
-        return to_fix
+        return to_fix, in_sync

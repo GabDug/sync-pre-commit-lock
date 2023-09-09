@@ -29,6 +29,8 @@ if TYPE_CHECKING:
     from cleo.events.event_dispatcher import EventDispatcher
     from cleo.io.io import IO
 
+    from sync_pre_commit_lock.pre_commit_config import PreCommitRepo
+
 
 class PoetryPrinter(Printer):
     success_list_token: str = "<fg=green;options=bold>•</>"
@@ -51,6 +53,30 @@ class PoetryPrinter(Printer):
 
     def success(self, msg: str) -> None:
         return self.io.write_line(f"<success>{self.plugin_prefix} {msg}</success>", verbosity=Verbosity.NORMAL)
+
+    def list_updated_packages(self, packages: dict[str, tuple[PreCommitRepo, str]]) -> None:
+        from cleo.ui.table import Table
+
+        table = Table(self.io, style="compact")
+
+        table.set_rows(
+            [
+                [
+                    "<info>" + self.plugin_prefix + " " + self.success_list_token,
+                    self._format_repo_url(repo[0].repo, package),
+                    " ",
+                    "<warning>" + repo[0].rev + "</>",
+                    "->",
+                    "<success>" + repo[1] + "</>" + "</>",
+                ]
+                for package, repo in packages.items()
+            ]
+        )
+
+        table.render()
+
+    def _format_repo_url(self, repo_url: str, package_name: str) -> str:
+        return repo_url.replace(package_name, f"<c1>{package_name}</>")
 
 
 class PoetrySetupPreCommitHooks(SetupPreCommitHooks):
