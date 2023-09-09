@@ -14,6 +14,7 @@ from sync_pre_commit_lock.pdm_plugin import (
     PDMPrinter,
     PDMSetupPreCommitHooks,
 )
+from sync_pre_commit_lock.pre_commit_config import PreCommitRepo
 
 # Create the mock objects
 
@@ -72,3 +73,21 @@ def test_on_pdm_install_setup_pre_commit_success(project: Project) -> None:
         on_pdm_install_setup_pre_commit(project, hooks=hooks_mock, candidates=candidates_mock, dry_run=False)
 
     action_mock.execute.assert_called_once()
+
+
+def test_pdm_printer_list_success(capsys: pytest.CaptureFixture[str]) -> None:
+    from sync_pre_commit_lock.pdm_plugin import PDMPrinter
+
+    printer = PDMPrinter(UI())
+
+    printer.list_updated_packages(
+        {
+            "package1": (
+                PreCommitRepo(repo="https://repo1.local/test", rev="rev1"),
+                "rev2",
+            )
+        }
+    )
+    captured = capsys.readouterr()
+
+    assert "[sync-pre-commit-lock]  ✔ https://repo1.local/test   rev1 -> rev2" in captured.out

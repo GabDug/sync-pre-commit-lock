@@ -29,14 +29,16 @@ class TestSetupPreCommitHooks:
         assert printer.debug.call_count == 1
         assert printer.debug.call_args == call("pre-commit package is not installed (or detected). Skipping.")
 
-    def test_execute_not_in_git_repo(self, printer: MagicMock, mock_subprocess, mocker) -> None:
-        mock_subprocess.return_value.decode.return_value = "pre-commit"
-        mocker.patch("subprocess.check_output", side_effect=subprocess.CalledProcessError(1, "cmd"))
+    def test_execute_not_in_git_repo(self, printer: MagicMock, mocker: MockerFixture) -> None:
+        mocker.patch(
+            "subprocess.check_output", side_effect=subprocess.CalledProcessError(1, "git", b"error", b"output")
+        )
+        mocker.patch("subprocess.check_call", return_value=0)
+
         setup = SetupPreCommitHooks(printer, dry_run=False)
         setup._is_pre_commit_package_installed = MagicMock(return_value=True)
-        setup._get_git_directory_path = MagicMock(return_value=None)
         setup.execute()
-        assert printer.debug.call_count == 1
+        assert printer.debug.call_count == 3
         assert printer.debug.call_args == call("Not in a git repository - can't install hooks. Skipping.")
 
     def test_execute_pre_commit_hooks_already_installed(
