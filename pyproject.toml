@@ -4,7 +4,7 @@ build-backend = "pdm.backend"
 
 [project]
 name = "sync-pre-commit-lock"
-version = "0.3.0"
+dynamic = ["version"]
 description = "PDM plugin to sync your pre-commit versions with your lockfile, and install them, all automatically."
 authors = [{ name = "Gabriel Dugny", email = "sync-pre-commit-lock@dugny.me" }]
 dependencies = [
@@ -29,17 +29,17 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Typing :: Typed",
 ]
+
 [project.urls]
 "Homepage" = "https://github.com/GabDug/sync-pre-commit-lock"
 "Changelog" = "https://github.com/GabDug/sync-pre-commit-lock/blob/main/CHANGELOG.md"
 "Bug Tracker" = "https://github.com/GabDug/sync-pre-commit-lock/issues"
 
-
 [project.entry-points.pdm]
 pdm-sync-pre-commit-lock = "sync_pre_commit_lock.pdm_plugin:register_pdm_plugin"
+
 [project.entry-points."poetry.application.plugin"]
 poetry-sync-pre-commit-lock = "sync_pre_commit_lock.poetry_plugin:SyncPreCommitLockPlugin"
-
 
 [project.optional-dependencies]
 poetry = [
@@ -48,6 +48,26 @@ poetry = [
 pdm = [
     "pdm>=2.7.4",
 ]
+
+
+[tool.pdm]
+plugins = [
+    "-e ."
+]
+
+[tool.pdm.version]
+source = "scm"
+write_to = "sync_pre_commit_lock/_version.py"
+write_template = "__version__: str = \"{}\"\n"
+
+[tool.pdm.scripts]
+fmt = {cmd="black .", help="Run black formatter"}
+lint-mypy = {cmd="mypy src", help="Run mypy type checker"}
+# XXX(dugab): run mypy on tests as well
+lint-ruff = {cmd="ruff .", help="Run ruff linter"}
+test-cov = {cmd="pytest --junitxml=junit/test-results.xml --cov --cov-report=xml --cov-report=html --cov-report=term-missing", help="Run tests with coverage"}
+
+
 [tool.pdm.dev-dependencies]
 dev = [
     "PyYAML>=6.0",
@@ -61,17 +81,6 @@ dev = [
     "pre-commit>=3.3.3",
     "tomli>=2.0.1",
 ]
-[tool.pdm]
-plugins = [
-    "-e ."
-]
-
-[tool.pdm.scripts]
-fmt = {cmd="black .", help="Run black formatter"}
-lint-mypy = {cmd="mypy src", help="Run mypy type checker"}
-# XXX(dugab): run mypy on tests as well
-lint-ruff = {cmd="ruff .", help="Run ruff linter"}
-test-cov = {cmd="pytest --junitxml=junit/test-results.xml --cov --cov-report=xml --cov-report=html --cov-report=term-missing", help="Run tests with coverage"}
 
 [tool.ruff]
 line-length = 140
