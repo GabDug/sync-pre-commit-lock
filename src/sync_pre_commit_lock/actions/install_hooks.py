@@ -73,12 +73,16 @@ class SetupPreCommitHooks:
     def _are_pre_commit_hooks_installed(git_root: Path) -> bool:
         return (git_root / "hooks" / "pre-commit").exists()
 
-    @staticmethod
-    def _get_git_directory_path() -> Path | None:
+    def _get_git_directory_path(self) -> Path | None:
         try:
             result = subprocess.check_output(
                 ["git", "rev-parse", "--show-toplevel"],  # noqa: S603, S607
+                stderr=subprocess.PIPE,
             )
             return Path(result.decode().strip()) / ".git"
-        except (subprocess.CalledProcessError, FileNotFoundError):
+        except (subprocess.CalledProcessError,) as exc:
+            self.printer.debug("Failed to get git root directory.")
+            self.printer.debug(f"Git command stderr: {exc.stderr.decode()}")
+            return None
+        except FileNotFoundError:
             return None
