@@ -18,7 +18,7 @@ DEPENDENCY_MAPPING: PackageRepoMapping = {
         "rev": "${rev}",
     },
     "black": {
-        "repo": "https://github.com/psf/black",
+        "repo": "https://github.com/psf/black-pre-commit-mirror",
         "rev": "${rev}",
     },
     "commitizen": {
@@ -46,7 +46,7 @@ DEPENDENCY_MAPPING: PackageRepoMapping = {
         "rev": "v${rev}",
     },
     "ruff": {
-        "repo": "https://github.com/charliermarsh/ruff-pre-commit",
+        "repo": "https://github.com/astral-sh/ruff-pre-commit",
         "rev": "v${rev}",
     },
     "rtscheck": {
@@ -65,4 +65,9 @@ DEPENDENCY_MAPPING: PackageRepoMapping = {
         "repo": "https://github.com/regebro/pyroma",
         "rev": "${rev}",
     },
+}
+
+REPOSITORY_ALIASES: dict[str, tuple[str, ...]] = {
+    "https://github.com/astral-sh/ruff-pre-commit": ("https://github.com/charliermarsh/ruff-pre-commit",),
+    "https://github.com/psf/black-pre-commit-mirror": ("https://github.com/psf/black",),
 }

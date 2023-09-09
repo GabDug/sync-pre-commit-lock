@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, NamedTuple
 
-from sync_pre_commit_lock.db import DEPENDENCY_MAPPING, PackageRepoMapping, RepoInfo
+from sync_pre_commit_lock.db import DEPENDENCY_MAPPING, REPOSITORY_ALIASES, PackageRepoMapping, RepoInfo
 from sync_pre_commit_lock.pre_commit_config import PreCommitHookConfig, PreCommitRepo
 
 if TYPE_CHECKING:
@@ -99,6 +99,10 @@ class SyncPreCommitHooksVersion:
         """Merge the default mapping with the user-provided mapping. Also build a reverse mapping by URL."""
         mapping: PackageRepoMapping = {**DEPENDENCY_MAPPING, **self.plugin_config.dependency_mapping}
         mapping_reverse_by_url = {repo["repo"]: lib_name for lib_name, repo in mapping.items()}
+        for canonical_name, aliases in REPOSITORY_ALIASES.items():
+            for alias in aliases:
+                mapping_reverse_by_url[alias] = mapping_reverse_by_url[canonical_name]
+        # XXX Allow override / extend of aliases
         return mapping, mapping_reverse_by_url
 
     def analyze_repos(
