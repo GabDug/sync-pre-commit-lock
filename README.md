@@ -18,6 +18,7 @@ PDM and Poetry plugin to sync your pre-commit versions with your lockfile and au
 - ⏩ Run every time you run the lockfile is updated, not as a pre-commit hook
 - 🔄 Install pre-commit hooks automatically, no need to run `pre-commit install` manually
 - 💫 Preserve your pre-commit config file formatting
+- 🍃 Lightweight, only depends on [strictyaml](https://pypi.org/project/strictyaml/)
 
 ## Supported versions
 
@@ -40,11 +41,12 @@ Optionally, you can also specify [the plugin in your project](https://pdm.fming.
 ```toml
 [tool.pdm]
 plugins = [
-    "sync-pre-commit-lock[pdm]"
+    "sync-pre-commit-lock"
 ]
 ```
 
-> We add the extra group `[pdm]` to the plugin name, to make sure version constraints are met.
+> Note: we have an extra group `[pdm]`, that adds PDM version constraints.
+> WHile it's safer, it might result in PDM being installed twice.
 
 ### For Poetry
 
@@ -105,20 +107,21 @@ Both commands support `--dry-run` and verbosity options.
 
 Feel free to open an issue or a PR if you have any idea, or if you want to help!
 
-### Release / CI / Dev
+### Release / CI / DX
 
+- [X] Add PDM scripts for dev and CI
 - [ ] Upload build artifacts on GitHub release
 - [ ] Add a changelog
 - [ ] Add "E2E" tests
-- [X] Add PDM scripts for dev and CI
 - [ ] Add docs
 
 ### Features or fixes
 
+- [X] Add a PDM/Poetry CLI command to sync manually
+  - [X] `pdm sync-pre-commit` and `poetry sync-pre-commit`
+- [ ] Support `pdm config` and clear configuration precedence
 - [ ] Create a more verbose command
 - [ ] Add support for other lockfiles / project managers (pipenv, flit, hatch, etc.)
-- [X] Add a PDM/Poetry CLI command to sync manually
-- [ ] Add a dedicated CLI command to manage sync/install
 - [ ] Expose a pre-commit hook to sync the lockfile
 - [ ] Support nested params for some repos? Like mypy types
 - [ ] Support reading DB from a Python module?
