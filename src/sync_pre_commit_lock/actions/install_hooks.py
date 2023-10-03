@@ -80,7 +80,7 @@ class SetupPreCommitHooks:
                 stderr=subprocess.PIPE,
             )
             return Path(result.decode().strip()) / ".git"
-        except (subprocess.CalledProcessError,) as exc:
+        except subprocess.CalledProcessError as exc:
             self.printer.debug("Failed to get git root directory.")
             self.printer.debug(f"Git command stderr: {exc.stderr.decode()}")
             return None
