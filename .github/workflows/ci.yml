@@ -80,7 +80,7 @@ jobs:
           pdm run lint-mypy
       - name: Lint with ruff
         run: |
-          pdm run lint-ruff --format=github --exit-non-zero-on-fix
+          pdm run lint-ruff --output-format=github --exit-non-zero-on-fix
       - name: Build with pdm
         run: |
           pdm build
