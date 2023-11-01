@@ -90,6 +90,7 @@ extend-ignore =["S101"]
 target-version = "py310"
 
 [tool.mypy]
+files = ["src"]
 strict = true
 
 [[tool.mypy.overrides]]

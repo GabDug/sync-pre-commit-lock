@@ -65,6 +65,10 @@ DEPENDENCY_MAPPING: PackageRepoMapping = {
         "repo": "https://github.com/regebro/pyroma",
         "rev": "${rev}",
     },
+    "yamllint": {
+        "repo": "https://github.com/adrienverge/yamllint",
+        "rev": "v${rev}",
+    },
 }
 
 REPOSITORY_ALIASES: dict[str, tuple[str, ...]] = {

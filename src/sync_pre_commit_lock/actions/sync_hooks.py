@@ -135,6 +135,14 @@ class SyncPreCommitHooksVersion:
                 )
                 continue
 
+            if "+" in dependency_locked.version:
+                self.printer.debug(
+                    f"Pre-commit hook {pre_commit_repo.repo} has a mapping to Python package `{dependency_name}`, "
+                    f"but is skipped because the locked version `{dependency_locked.version}` contaims a `+`, "
+                    "which is a local version identifier."
+                )
+                continue
+
             new_ver = self.get_pre_commit_repo_new_version(pre_commit_repo, dependency, dependency_locked)
             if new_ver:
                 to_fix[pre_commit_repo] = new_ver
