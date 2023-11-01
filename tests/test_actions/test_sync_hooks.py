@@ -359,3 +359,26 @@ def test_analyze_repos_no_new_version() -> None:
     result, _ = syncer.analyze_repos(pre_commit_repos, mapping, mapping_reverse_by_url)
 
     assert result == {}
+
+
+def test_analyze_repos_local() -> None:
+    printer = MagicMock(spec=Printer)
+    pre_commit_config_file_path = MagicMock(spec=Path)
+    locked_packages: dict[str, GenericLockedPackage] = {"lib_name": MagicMock(version="0.1.1+dev")}
+    plugin_config = MagicMock(spec=SyncPreCommitLockConfig)
+    plugin_config.ignore = []
+
+    syncer = SyncPreCommitHooksVersion(
+        printer=printer,
+        pre_commit_config_file_path=pre_commit_config_file_path,
+        locked_packages=locked_packages,
+        plugin_config=plugin_config,
+    )
+
+    pre_commit_repos = {PreCommitRepo("repo_url", "1.2.3")}
+    mapping = {"lib_name": RepoInfo(repo="repo_url", rev="${rev}")}
+    mapping_reverse_by_url = {"repo_url": "lib_name"}
+
+    result, _ = syncer.analyze_repos(pre_commit_repos, mapping, mapping_reverse_by_url)
+
+    assert result == {}
