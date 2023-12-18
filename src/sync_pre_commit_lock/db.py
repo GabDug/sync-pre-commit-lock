@@ -21,6 +21,10 @@ DEPENDENCY_MAPPING: PackageRepoMapping = {
         "repo": "https://github.com/psf/black-pre-commit-mirror",
         "rev": "${rev}",
     },
+    "codespell": {
+        "repo": "https://github.com/codespell-project/codespell",
+        "rev": "v${rev}",
+    },
     "commitizen": {
         "repo": "https://github.com/commitizen-tools/commitizen",
         "rev": "v${rev}",
