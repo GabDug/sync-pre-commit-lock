@@ -83,6 +83,17 @@ dependency-mapping = {"package-name"= {"repo"= "https://github.com/example/packa
 > Note: the `dependency-mapping` is merged with the default mapping, so you don't need to specify the default mapping if you want to add a new mapping.
 > Repos urls will be normalized to http(s), with the trailing slash removed.
 
+### From environment
+
+Some settings are overridable by environment variables with the following `SYNC_PRE_COMMIT_LOCK_*` prefixed environment variables:
+
+| `toml` setting                | environment                            | format                            |
+| ------------------------------|----------------------------------------|-----------------------------------|
+| `automatically-install-hooks` | `SYNC_PRE_COMMIT_LOCK_INSTALL`         | `bool` as string (`true`, `1`...) |
+| `disable-sync-from-lock`      | `SYNC_PRE_COMMIT_LOCK_DISABLED`        | `bool` as string (`true`, `1`...) |
+| `ignore`                      | `SYNC_PRE_COMMIT_LOCK_IGNORE`          | comma-separated list              |
+| `pre-commit-config-file`      | `SYNC_PRE_COMMIT_LOCK_PRE_COMMIT_FILE` | `str`                             |
+
 ## Usage
 
 Once installed, and optionally configured, the plugin usage should be transparent, and trigger when you run applicable PDM or Poetry commands, like `pdm lock`, or `poetry lock`.
