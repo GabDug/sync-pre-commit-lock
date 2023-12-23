@@ -29,6 +29,9 @@ def env_as_list(value: str) -> list[str]:
 
 
 def from_toml(data: dict[str, Any]) -> SyncPreCommitLockConfig:
+    if len(data) == 0:
+        return SyncPreCommitLockConfig()
+
     fields = {f.metadata.get("toml", f.name): f for f in SyncPreCommitLockConfig.__dataclass_fields__.values()}
     # XXX We should warn about unknown fields
     return SyncPreCommitLockConfig(
@@ -91,13 +94,19 @@ class SyncPreCommitLockConfig:
 
 
 def load_config(path: Path | None = None) -> SyncPreCommitLockConfig:
-    # XXX We should not hard-code this, and get the filename from PDM/Poetry/custom resolution
+    """
+    Load the configuration from pyproject.toml file, and then from environment variables.
+
+    Args:
+        path (Path | None): The path to the pyproject.toml file. If None, defaults to "pyproject.toml". Best if provided by PDM or Poetry.
+
+    Returns:
+        SyncPreCommitLockConfig: The loaded configuration.
+    """
     path = path or Path("pyproject.toml")
     with path.open("rb") as file:
         config_dict = toml.load(file)
 
-    tool_dict = config_dict.get("tool", {}).get("sync-pre-commit-lock", {})
-    if not tool_dict or len(tool_dict) == 0:
-        return SyncPreCommitLockConfig()
+    tool_dict: dict[str, Any] = config_dict.get("tool", {}).get("sync-pre-commit-lock", {})
 
     return update_from_env(from_toml(tool_dict))
