@@ -5,7 +5,8 @@ on:
     types: [published]
 
 permissions:
-  contents: read
+  contents: write
+
 
 jobs:
   pypi-publish:
@@ -29,3 +30,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           file: ./dist/*
+          release_id: ${{ github.event.release.id }}
