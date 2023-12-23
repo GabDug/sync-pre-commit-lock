@@ -99,7 +99,8 @@ def on_pdm_install_setup_pre_commit(
     project: Project, *, hooks: HookManager, candidates: list[Candidate], dry_run: bool, **_: Any
 ) -> None:
     printer = PDMPrinter(project.core.ui)
-    plugin_config: SyncPreCommitLockConfig = load_config()
+    project_root: Path = project.root
+    plugin_config: SyncPreCommitLockConfig = load_config(project_root / project.PYPROJECT_FILENAME)
     printer.debug("Checking if pre-commit hooks are installed")
 
     if not plugin_config.automatically_install_hooks:

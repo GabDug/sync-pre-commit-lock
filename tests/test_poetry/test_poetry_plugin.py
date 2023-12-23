@@ -33,7 +33,8 @@ def test_handle_post_command_exit_code_not_zero() -> None:
 
 
 @patch("sync_pre_commit_lock.poetry_plugin.PoetrySetupPreCommitHooks.execute")
-def test_handle_post_command_install_add_commands(mocked_execute: MagicMock) -> None:
+@patch("sync_pre_commit_lock.config.toml.load", return_value={"tool": {"sync-pre-commit-lock": {}}})
+def test_handle_post_command_install_add_commands(mocked_execute: MagicMock, mock_load: MagicMock) -> None:
     event = MagicMock(
         spec=ConsoleTerminateEvent,
         exit_code=0,
@@ -62,7 +63,8 @@ def test_handle_post_command_self_command() -> None:
 
 
 @patch("sync_pre_commit_lock.poetry_plugin.SyncPreCommitHooksVersion.execute")
-def test_handle_post_command_install_add_lock_update_commands(mocked_execute: MagicMock) -> None:
+@patch("sync_pre_commit_lock.config.toml.load", return_value={"tool": {"sync-pre-commit-lock": {}}})
+def test_handle_post_command_install_add_lock_update_commands(mocked_execute: MagicMock, mock_load: MagicMock) -> None:
     event = MagicMock(
         spec=ConsoleTerminateEvent,
         exit_code=0,

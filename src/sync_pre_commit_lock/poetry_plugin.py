@@ -87,7 +87,7 @@ class PoetrySetupPreCommitHooks(SetupPreCommitHooks):
 def run_sync_pre_commit_version(printer: PoetryPrinter, dry_run: bool, application: Application) -> None:
     poetry_locked_packages = application.poetry.locker.locked_repository().packages
     locked_packages = {str(p.name): GenericLockedPackage(p.name, str(p.version)) for p in poetry_locked_packages}
-    plugin_config = load_config()
+    plugin_config = load_config(application.poetry.pyproject_path)
     file_path = Path().cwd() / plugin_config.pre_commit_config_file
 
     SyncPreCommitHooksVersion(
