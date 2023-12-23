@@ -32,7 +32,7 @@ classifiers = [
 
 [project.urls]
 "Homepage" = "https://github.com/GabDug/sync-pre-commit-lock"
-"Changelog" = "https://github.com/GabDug/sync-pre-commit-lock/blob/main/CHANGELOG.md"
+"Changelog" = "https://github.com/GabDug/sync-pre-commit-lock/releases"
 "Bug Tracker" = "https://github.com/GabDug/sync-pre-commit-lock/issues"
 
 [project.entry-points.pdm]
