@@ -6,7 +6,9 @@ All contributions are welcome!
 
 If you are not sure what to do, check the README roadmap for ideas.
 
-If you have something in mind, please try to open an issue to discuss it first.
+If you have something in mind, don't hesitate to open an issue to discuss it.
+
+PRs are welcomed without prior discussion, but please open an issue if you want to work on something big, to avoid wasting time.
 
 ## Repository to package mapping
 
