@@ -12,6 +12,8 @@
 
 PDM and Poetry plugin to sync your pre-commit versions with your lockfile and automatically install pre-commit hooks.
 
+![Sample output](.github/sample_command.png)
+
 ## Features
 
 - 🔁 Sync pre-commit versions with your lockfile
@@ -33,7 +35,7 @@ PDM and Poetry plugin to sync your pre-commit versions with your lockfile and au
 Install it [just like any other PDM plugin](https://pdm.fming.dev/latest/dev/write/#activate-the-plugin):
 
 ```bash
-pdm self add "sync-pre-commit-lock[pdm]"
+pdm self add "sync-pre-commit-lock"
 ```
 
 Optionally, you can also specify [the plugin in your project](https://pdm.fming.dev/latest/dev/write/#specify-the-plugins-in-project) `pyproject.toml`, to make it installable with `pdm install --plugins`:
@@ -46,7 +48,7 @@ plugins = [
 ```
 
 > Note: we have an extra group `[pdm]`, that adds PDM version constraints.
-> WHile it's safer, it might result in PDM being installed twice.
+> While it's safer, it might result in PDM being installed twice.
 
 ### For Poetry
 
@@ -120,7 +122,6 @@ Feel free to open an issue or a PR if you have any idea, or if you want to help!
 
 ### Release / CI / DX
 
-- [X] Add PDM scripts for dev and CI
 - [ ] Upload build artifacts on GitHub release
 - [ ] Add a changelog
 - [ ] Add "E2E" tests
@@ -128,8 +129,6 @@ Feel free to open an issue or a PR if you have any idea, or if you want to help!
 
 ### Features or fixes
 
-- [X] Add a PDM/Poetry CLI command to sync manually
-  - [X] `pdm sync-pre-commit` and `poetry sync-pre-commit`
 - [X] Support hooks URL aliases for the same Python package
   - [ ] Support user configuration of aliases
 - [ ] Support `pdm config` and clear configuration precedence
