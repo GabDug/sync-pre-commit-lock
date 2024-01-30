@@ -37,8 +37,9 @@ action_mock = mock.create_autospec(PDMSetupPreCommitHooks, instance=True)
 
 def test_on_pdm_install_setup_pre_commit_auto_install_disabled(project: mock.MagicMock) -> None:
     config_mock.automatically_install_hooks = False
-    with mock.patch("sync_pre_commit_lock.pdm_plugin.PDMPrinter", return_value=printer_mock), mock.patch(
-        "sync_pre_commit_lock.pdm_plugin.load_config", return_value=config_mock
+    with (
+        mock.patch("sync_pre_commit_lock.pdm_plugin.PDMPrinter", return_value=printer_mock),
+        mock.patch("sync_pre_commit_lock.pdm_plugin.load_config", return_value=config_mock),
     ):
         from sync_pre_commit_lock.pdm_plugin import on_pdm_install_setup_pre_commit
 
@@ -50,8 +51,9 @@ def test_on_pdm_install_setup_pre_commit_no_config_file(tmp_path: Path, project:
     config_mock.automatically_install_hooks = True
     config_mock.pre_commit_config_file = SyncPreCommitLockConfig.pre_commit_config_file
     project.root = tmp_path
-    with mock.patch("sync_pre_commit_lock.pdm_plugin.PDMPrinter", return_value=printer_mock), mock.patch(
-        "sync_pre_commit_lock.pdm_plugin.load_config", return_value=config_mock
+    with (
+        mock.patch("sync_pre_commit_lock.pdm_plugin.PDMPrinter", return_value=printer_mock),
+        mock.patch("sync_pre_commit_lock.pdm_plugin.load_config", return_value=config_mock),
     ):
         from sync_pre_commit_lock.pdm_plugin import on_pdm_install_setup_pre_commit
 
@@ -65,8 +67,9 @@ def test_on_pdm_install_setup_pre_commit_success(project: Project) -> None:
     project.root = (
         Path(__file__).parent.parent / "fixtures" / "poetry_project"
     )  # Assuming config file exists at this path
-    with mock.patch("sync_pre_commit_lock.pdm_plugin.load_config", return_value=config_mock), mock.patch(
-        "sync_pre_commit_lock.pdm_plugin.PDMSetupPreCommitHooks", return_value=action_mock
+    with (
+        mock.patch("sync_pre_commit_lock.pdm_plugin.load_config", return_value=config_mock),
+        mock.patch("sync_pre_commit_lock.pdm_plugin.PDMSetupPreCommitHooks", return_value=action_mock),
     ):
         from sync_pre_commit_lock.pdm_plugin import on_pdm_install_setup_pre_commit
 
