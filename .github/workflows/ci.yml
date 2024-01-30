@@ -21,7 +21,7 @@ jobs:
       matrix:
         python-version: ["3.10", "3.11", "3.12"]
         # Empty is latest, head is latest from GitHub
-        pdm-version: ["", "head", "2.7.4", "2.8.0", "2.8.1", "2.8.2", "2.9.3", "2.10.4"]
+        pdm-version: ["", "head", "2.7.4", "2.8.2", "2.9.3", "2.10.4", "2.11.2", "2.12.2"]
 
     steps:
       - uses: actions/checkout@v3
