@@ -86,6 +86,8 @@ dev = [
 [tool.ruff]
 line-length = 140
 respect-gitignore = true
+
+[tool.ruff.lint]
 extend-select = ["Q000", "TCH", "I001", "S", "T", "PTH", "PYI", "RET", "D209", "D202", "EM101"]
 extend-ignore =["S101"]
 
