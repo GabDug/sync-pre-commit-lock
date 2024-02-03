@@ -4,7 +4,7 @@ name: Update Python dependencies with PDM
 
 on:
   schedule:
-    - cron: "0 12 * * *"
+    - cron: "0 12 * * SAT"
   workflow_dispatch:
 
 permissions:
