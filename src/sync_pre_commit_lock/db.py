@@ -16,7 +16,7 @@ PackageRepoMapping: TypeAlias = dict[str, RepoInfo]
 
 DEPENDENCY_MAPPING: PackageRepoMapping = {
     "autopep8": {
-        "repo": "https://github.com/pre-commit/mirrors-autopep8",
+        "repo": "https://github.com/hhatto/autopep8",
         "rev": "v${rev}",
     },
     "bandit": {
@@ -88,4 +88,5 @@ DEPENDENCY_MAPPING: PackageRepoMapping = {
 REPOSITORY_ALIASES: dict[str, tuple[str, ...]] = {
     "https://github.com/astral-sh/ruff-pre-commit": ("https://github.com/charliermarsh/ruff-pre-commit",),
     "https://github.com/psf/black-pre-commit-mirror": ("https://github.com/psf/black",),
+    "https://github.com/hhatto/autopep8": ("https://github.com/pre-commit/mirrors-autopep8",),
 }
