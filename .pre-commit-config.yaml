@@ -14,12 +14,7 @@ repos:
       - id: check-merge-conflict
       - id: fix-byte-order-marker
 
-  - repo: https://github.com/psf/black-pre-commit-mirror
-    rev: 24.1.1
-    hooks:
-      - id: black
-
-  - rev: v0.2.1
+  - rev: v0.2.2
     repo: https://github.com/astral-sh/ruff-pre-commit
     hooks:
       - id: ruff

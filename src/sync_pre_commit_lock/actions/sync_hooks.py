@@ -83,8 +83,7 @@ class SyncPreCommitHooksVersion:
             return None
 
         self.printer.debug(
-            f"Found mapping between pre-commit hook `{pre_commit_config_repo.repo}` and locked package"
-            f" `{locked_package.name}`."
+            f"Found mapping between pre-commit hook `{pre_commit_config_repo.repo}` and locked package `{locked_package.name}`."
         )
         formatted_rev = mapping_db_repo_info["rev"].replace("${rev}", str(locked_package.version))
         if formatted_rev != pre_commit_config_repo.rev:
@@ -96,8 +95,7 @@ class SyncPreCommitHooksVersion:
             return formatted_rev
 
         self.printer.debug(
-            f"Pre-commit hook {pre_commit_config_repo.repo} version already matches the version from the lockfile"
-            " package."
+            f"Pre-commit hook {pre_commit_config_repo.repo} version already matches the version from the lockfile package."
         )
         return None
 
