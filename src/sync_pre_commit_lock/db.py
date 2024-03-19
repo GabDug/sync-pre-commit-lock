@@ -39,6 +39,10 @@ DEPENDENCY_MAPPING: PackageRepoMapping = {
         "repo": "https://github.com/commitizen-tools/commitizen",
         "rev": "v${rev}",
     },
+    "djhtml": {
+        "repo": "https://github.com/rtts/djhtml",
+        "rev": "${rev}",
+    },
     "flake8": {
         "repo": "https://github.com/pycqa/flake8",
         "rev": "${rev}",
