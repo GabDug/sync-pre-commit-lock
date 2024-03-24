@@ -43,6 +43,10 @@ DEPENDENCY_MAPPING: PackageRepoMapping = {
         "repo": "https://github.com/rtts/djhtml",
         "rev": "${rev}",
     },
+    "docformatter": {
+        "repo": "https://github.com/PyCQA/docformatter",
+        "rev": "${rev}",
+    },
     "flake8": {
         "repo": "https://github.com/pycqa/flake8",
         "rev": "${rev}",
@@ -59,29 +63,25 @@ DEPENDENCY_MAPPING: PackageRepoMapping = {
         "repo": "https://github.com/pre-commit/mirrors-mypy",
         "rev": "v${rev}",
     },
-    "pyupgrade": {
-        "repo": "https://github.com/asottile/pyupgrade",
+    "pycln": {
+        "repo": "https://github.com/hadialqattan/pycln",
         "rev": "v${rev}",
     },
-    "ruff": {
-        "repo": "https://github.com/astral-sh/ruff-pre-commit",
+    "pyroma": {
+        "repo": "https://github.com/regebro/pyroma",
+        "rev": "${rev}",
+    },
+    "pyupgrade": {
+        "repo": "https://github.com/asottile/pyupgrade",
         "rev": "v${rev}",
     },
     "rtscheck": {
         "repo": "https://github.com/rstcheck/rstcheck",
         "rev": "v${rev}",
     },
-    "pycln": {
-        "repo": "https://github.com/hadialqattan/pycln",
+    "ruff": {
+        "repo": "https://github.com/astral-sh/ruff-pre-commit",
         "rev": "v${rev}",
-    },
-    "docformatter": {
-        "repo": "https://github.com/PyCQA/docformatter",
-        "rev": "${rev}",
-    },
-    "pyroma": {
-        "repo": "https://github.com/regebro/pyroma",
-        "rev": "${rev}",
     },
     "yamllint": {
         "repo": "https://github.com/adrienverge/yamllint",
