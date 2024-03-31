@@ -1,55 +1,53 @@
 [build-system]
-requires = ["pdm-backend"]
 build-backend = "pdm.backend"
+requires = [
+  "pdm-backend",
+]
 
 [project]
 name = "sync-pre-commit-lock"
-dynamic = ["version"]
 description = "PDM plugin to sync your pre-commit versions with your lockfile, and install them, all automatically."
-authors = [{ name = "Gabriel Dugny", email = "sync-pre-commit-lock@dugny.me" }]
-dependencies = [
-    "tomli>=2.0.0; python_version < \"3.11\"",
-    "strictyaml>=1.7.3",
-]
-requires-python = ">=3.9"
 readme = "README.md"
 license = { file = "LICENSE" }
+authors = [{ name = "Gabriel Dugny", email = "sync-pre-commit-lock@dugny.me" }]
+requires-python = ">=3.9"
 classifiers = [
-    "Development Status :: 3 - Alpha",
-    "Intended Audience :: Developers",
-    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
-    "Environment :: Console",
-    "Environment :: Plugins",
-    "Operating System :: OS Independent",
-    "Programming Language :: Python",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
-    "Typing :: Typed",
+  "Development Status :: 3 - Alpha",
+  "Environment :: Console",
+  "Environment :: Plugins",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Typing :: Typed",
 ]
-
+dynamic = [
+  "version",
+]
+dependencies = [
+  "strictyaml>=1.7.3",
+  'tomli>=2; python_version < "3.11"',
+]
+[project.optional-dependencies]
+pdm = [
+  "pdm>=2.7.4",
+]
+poetry = [
+  "poetry>=1.6",
+]
 [project.urls]
-"Homepage" = "https://github.com/GabDug/sync-pre-commit-lock"
-"Changelog" = "https://github.com/GabDug/sync-pre-commit-lock/releases"
 "Bug Tracker" = "https://github.com/GabDug/sync-pre-commit-lock/issues"
-
+"Changelog" = "https://github.com/GabDug/sync-pre-commit-lock/releases"
+"Homepage" = "https://github.com/GabDug/sync-pre-commit-lock"
 [project.entry-points.pdm]
 pdm-sync-pre-commit-lock = "sync_pre_commit_lock.pdm_plugin:register_pdm_plugin"
-
 [project.entry-points."poetry.application.plugin"]
 poetry-sync-pre-commit-lock = "sync_pre_commit_lock.poetry_plugin:SyncPreCommitLockPlugin"
-
-[project.optional-dependencies]
-poetry = [
-    "poetry>=1.6.0",
-]
-pdm = [
-    "pdm>=2.7.4",
-]
-
 
 [tool.pdm]
 plugins = [
@@ -65,7 +63,7 @@ write_template = "__version__: str = \"{}\"\n"
 fmt = {cmd="ruff format .", help="Run ruff formatter"}
 lint-mypy = {cmd="mypy src", help="Run mypy type checker"}
 # XXX(dugab): run mypy on tests as well
-lint-ruff = {cmd="ruff .", help="Run ruff linter"}
+lint-ruff = {cmd="ruff check .", help="Run ruff linter"}
 test-cov = {cmd="pytest --junitxml=junit/test-results.xml --cov --cov-report=xml --cov-report=html --cov-report=term-missing", help="Run tests with coverage"}
 
 
@@ -89,14 +87,6 @@ respect-gitignore = true
 [tool.ruff.lint]
 extend-select = ["Q000", "TCH", "I001", "S", "T", "PTH", "PYI", "RET", "D209", "D202", "EM101"]
 extend-ignore =["S101"]
-
-[tool.mypy]
-files = ["src"]
-strict = true
-
-[[tool.mypy.overrides]]
-module = "strictyaml"
-ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 minversion = "7.0"
@@ -122,3 +112,11 @@ exclude_lines = [
     "except ImportError:",
     "# nocov",
 ]
+
+[tool.mypy]
+files = ["src"]
+strict = true
+
+[[tool.mypy.overrides]]
+module = "strictyaml"
+ignore_missing_imports = true
