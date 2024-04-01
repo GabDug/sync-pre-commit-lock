@@ -163,3 +163,4 @@ cython_debug/
 junit
 .pdm-build
 src/sync_pre_commit_lock/_version.py
+requirements-tox.txt

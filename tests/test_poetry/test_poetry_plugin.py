@@ -2,6 +2,9 @@ import re
 from unittest.mock import MagicMock, patch
 
 import pytest
+
+poetry_module = pytest.importorskip("poetry")
+# ruff: noqa: E402
 from cleo.events.console_terminate_event import ConsoleTerminateEvent
 from poetry.console.application import Application
 from poetry.console.commands.install import InstallCommand

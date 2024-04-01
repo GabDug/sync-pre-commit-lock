@@ -64,9 +64,9 @@ class Metadata(TypedDict, total=False):
     toml: str
     """Map the `toml` field"""
     env: str
-    """Optionnaly map the environment variable suffix"""
+    """Optionally map the environment variable suffix"""
     cast: Callable[[str], Any]
-    """Optionnaly provide a cast function for environment variable"""
+    """Optionally provide a cast function for environment variable"""
 
 
 @dataclass

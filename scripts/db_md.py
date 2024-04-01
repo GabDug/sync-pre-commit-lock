@@ -56,7 +56,7 @@ def import_db() -> PackageRepoMapping:
     This function imports the database module located at 'src/sync_pre_commit_lock/db.py'
     and returns the DEPENDENCY_MAPPING dictionary from the imported module.
 
-    We don't import direcly because pre-commit may not have the Python environment configured.
+    We don't import directly because pre-commit may not have the Python environment configured.
 
     Returns:
         dict: The DEPENDENCY_MAPPING dictionary from the imported database module.
