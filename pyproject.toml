@@ -88,6 +88,7 @@ testtox = [
     "pytest-cov>=5.0.0",
     "pytest-mock>=3.14.0",
     "PyYAML>=6.0.1",
+    "tox-uv>=1.7.0",
 ]
 
 [tool.ruff]

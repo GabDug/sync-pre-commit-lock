@@ -5,7 +5,7 @@
 groups = ["default", "dev", "pdm", "poetry", "testtox"]
 strategy = ["cross_platform"]
 lock_version = "4.4.1"
-content_hash = "sha256:038ebe3c53dc2805fa29f2d8d0d66579327abe4e0b940097135365b54ba275fa"
+content_hash = "sha256:f2f2512d02fcd7b0a7c58ea80419e8a5d33425d5815616975053b988e6a3692f"
 
 [[package]]
 name = "anyio"
@@ -1530,6 +1530,21 @@ files = [
 ]
 
 [[package]]
+name = "tox-uv"
+version = "1.7.0"
+requires_python = ">=3.8"
+summary = "Integration of uv with tox."
+dependencies = [
+    "packaging>=23.2",
+    "tox<5,>=4.14",
+    "uv<1,>=0.1.15",
+]
+files = [
+    {file = "tox_uv-1.7.0-py3-none-any.whl", hash = "sha256:2915128b487ac720e27f8a6dc9597aa6925b62235c6041553055ced710943ea7"},
+    {file = "tox_uv-1.7.0.tar.gz", hash = "sha256:0278f38f305ad0515f4d2620c70a848ef4d135a3d9eb778878d1ac8cbdd8528e"},
+]
+
+[[package]]
 name = "trove-classifiers"
 version = "2024.3.25"
 summary = "Canonical source for classifiers on PyPI (pypi.org)."
@@ -1590,6 +1605,31 @@ summary = "HTTP library with thread-safe connection pooling, file post, and more
 files = [
     {file = "urllib3-2.2.1-py3-none-any.whl", hash = "sha256:450b20ec296a467077128bff42b73080516e71b56ff59a60a02bef2232c4fa9d"},
     {file = "urllib3-2.2.1.tar.gz", hash = "sha256:d0570876c61ab9e520d776c38acbbb5b05a776d3f9ff98a5c8fd5162a444cf19"},
+]
+
+[[package]]
+name = "uv"
+version = "0.1.26"
+requires_python = ">=3.8"
+summary = "An extremely fast Python package installer and resolver, written in Rust."
+files = [
+    {file = "uv-0.1.26-py3-none-linux_armv6l.whl", hash = "sha256:15ed1e79e880a3fd3a17ddfd80aac6419b29072aa6578ad9fbd556b88162352a"},
+    {file = "uv-0.1.26-py3-none-macosx_10_12_x86_64.macosx_11_0_arm64.macosx_10_12_universal2.whl", hash = "sha256:56eab3304ba1cc5a1d3f090dab675a446f161e1104470e98c051109402394545"},
+    {file = "uv-0.1.26-py3-none-macosx_10_12_x86_64.whl", hash = "sha256:ea6cfdc48167d13b33517e8a649a4226caead6e698c625bf0c30fab01fa8f6ca"},
+    {file = "uv-0.1.26-py3-none-manylinux_2_17_armv7l.manylinux2014_armv7l.whl", hash = "sha256:8052718335e727f091d9d51d86f2929ee314f99c18aba0ee5e5da6e746047933"},
+    {file = "uv-0.1.26-py3-none-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:f927f7345556515c08096533a335c9d1d82e2847bf12d952f64f1965a18c50fd"},
+    {file = "uv-0.1.26-py3-none-manylinux_2_17_ppc64.manylinux2014_ppc64.whl", hash = "sha256:d54625acfc50d141e3cafbc72ca4c95f7159ffb08330df4603ffd33ad1ee8df7"},
+    {file = "uv-0.1.26-py3-none-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl", hash = "sha256:a32eb98aeb97a75a10e9220580add9fe90beaacf1a0b4e5a7c3f7da2182de0a2"},
+    {file = "uv-0.1.26-py3-none-manylinux_2_17_s390x.manylinux2014_s390x.whl", hash = "sha256:334bcd2099aac0060964beda45294cd6bfacb188ce2724b638423c3e26e05954"},
+    {file = "uv-0.1.26-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:bf3c7337dc56185b4ac8c7844b3cabcc4f1a013be7cb0dc2eb16e028a19b1054"},
+    {file = "uv-0.1.26-py3-none-manylinux_2_28_aarch64.whl", hash = "sha256:0e97e4fd57718c4669a549d96ef61efaed23e426d6606829a02ec6e8718f3c37"},
+    {file = "uv-0.1.26-py3-none-musllinux_1_2_aarch64.whl", hash = "sha256:ce256a973071109e718acd8e5b03761fd97dfbf25f49cdab7f918d5548f86882"},
+    {file = "uv-0.1.26-py3-none-musllinux_1_2_armv7l.whl", hash = "sha256:af8f8bff2253b65f55a3e8e3adfb7ac393fcd62e860a8d67658ce7bb2c7dcb0d"},
+    {file = "uv-0.1.26-py3-none-musllinux_1_2_i686.whl", hash = "sha256:f7e1455857f82f75f41e8238ba411546d7ace335164a489e576afd9f79cd562f"},
+    {file = "uv-0.1.26-py3-none-musllinux_1_2_x86_64.whl", hash = "sha256:872248a82d70049586c6755200e9a2a9e83edef96b9f1b703e62badadfccae1c"},
+    {file = "uv-0.1.26-py3-none-win32.whl", hash = "sha256:1fb2ca59343db6bf92cda733dfb51ac946c1306e7e88e032bc02db3077545c0d"},
+    {file = "uv-0.1.26-py3-none-win_amd64.whl", hash = "sha256:d8497292b6846b047b0a46bab5bcaadc0df7823bdcac15ecbe3aa7ba78c06607"},
+    {file = "uv-0.1.26.tar.gz", hash = "sha256:8e2424445e269ff0f1855dfc5371e026ad7b49d5a9889c5e5c081af824991488"},
 ]
 
 [[package]]
