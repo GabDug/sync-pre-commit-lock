@@ -2,6 +2,9 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
+
+pdm_module = pytest.importorskip("pdm")
+# ruff: noqa: E402
 from pdm.core import Core
 from pdm.models.candidates import Candidate
 from pdm.models.requirements import NamedRequirement

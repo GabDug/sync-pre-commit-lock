@@ -4,6 +4,9 @@ from pathlib import Path
 from unittest import mock
 
 import pytest
+
+pdm_module = pytest.importorskip("pdm")
+# ruff: noqa: E402
 from pdm.cli.hooks import HookManager
 from pdm.core import Core
 from pdm.models.candidates import Candidate
