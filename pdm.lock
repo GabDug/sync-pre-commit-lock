@@ -5,7 +5,7 @@
 groups = ["default", "dev", "pdm", "poetry", "testtox"]
 strategy = ["cross_platform"]
 lock_version = "4.4.1"
-content_hash = "sha256:f2f2512d02fcd7b0a7c58ea80419e8a5d33425d5815616975053b988e6a3692f"
+content_hash = "sha256:383f100ac3c0fe151ab6d27f4239d2c4dcabe9bcb6d004181a66885e9adc656b"
 
 [[package]]
 name = "anyio"
