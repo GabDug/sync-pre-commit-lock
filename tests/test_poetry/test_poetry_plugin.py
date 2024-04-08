@@ -10,8 +10,9 @@ from poetry.console.application import Application
 from poetry.console.commands.install import InstallCommand
 from poetry.console.commands.lock import LockCommand
 from poetry.console.commands.self.self_command import SelfCommand
+
 from sync_pre_commit_lock.poetry_plugin import SyncPreCommitLockPlugin, SyncPreCommitPoetryCommand
-from sync_pre_commit_lock.pre_commit_config import PreCommitRepo
+from sync_pre_commit_lock.pre_commit_config import PreCommitHook, PreCommitRepo
 
 
 def test_activate() -> None:
@@ -110,6 +111,7 @@ def test_poetry_printer_list_success(capsys: pytest.CaptureFixture[str]) -> None
     from cleo.io.inputs.input import Input
     from cleo.io.io import IO
     from cleo.io.outputs.output import Output
+
     from sync_pre_commit_lock.poetry_plugin import PoetryPrinter
 
     output = Output()
@@ -122,9 +124,9 @@ def test_poetry_printer_list_success(capsys: pytest.CaptureFixture[str]) -> None
 
     printer.list_updated_packages(
         {
-            "package1": (
-                PreCommitRepo(repo="https://repo1.local/test", rev="rev1"),
-                "rev2",
+            "package": (
+                PreCommitRepo("https://repo1.local/test", "rev1", [PreCommitHook("hook")]),
+                PreCommitRepo("https://repo1.local/test", "rev2", [PreCommitHook("hook")]),
             )
         }
     )
@@ -133,6 +135,90 @@ def test_poetry_printer_list_success(capsys: pytest.CaptureFixture[str]) -> None
     out = re.sub(r"<[^>]*>", "", captured.out)
 
     assert "[sync-pre-commit-lock]  • https://repo1.local/test   rev1 -> rev2" in out
+
+
+def test_poetry_printer_list_success_additional_dependency(capsys: pytest.CaptureFixture[str]) -> None:
+    from cleo.io.inputs.input import Input
+    from cleo.io.io import IO
+    from cleo.io.outputs.output import Output
+
+    from sync_pre_commit_lock.poetry_plugin import PoetryPrinter
+
+    output = Output()
+
+    def _write(message: str, new_line: bool = False):
+        print(message)  # noqa: T201
+
+    output._write = _write
+    printer = PoetryPrinter(IO(input=Input(), output=output, error_output=output))
+
+    printer.list_updated_packages(
+        {
+            "package": (
+                PreCommitRepo("https://repo1.local/test", "rev1", [PreCommitHook("hook", ["dep"])]),
+                PreCommitRepo("https://repo1.local/test", "rev1", [PreCommitHook("hook", ["dep==0.1.2"])]),
+            )
+        }
+    )
+    captured = capsys.readouterr()
+    # Remove all <..> tags, as we don't have the real parser
+    out = re.sub(r"<[^>]*>", "", captured.out)
+
+    assert "[sync-pre-commit-lock]  • https://repo1.local/test" in out
+    assert "[sync-pre-commit-lock]    └ hook" in out
+    assert "[sync-pre-commit-lock]      └ dep                    * -> 0.1.2" in out
+
+
+def test_poetry_printer_list_success_with_multiple_hooks_and_additional_dependency(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    from cleo.io.inputs.input import Input
+    from cleo.io.io import IO
+    from cleo.io.outputs.output import Output
+
+    from sync_pre_commit_lock.poetry_plugin import PoetryPrinter
+
+    output = Output()
+
+    def _write(message: str, new_line: bool = False):
+        print(message)  # noqa: T201
+
+    output._write = _write
+    printer = PoetryPrinter(IO(input=Input(), output=output, error_output=output))
+
+    printer.list_updated_packages(
+        {
+            "package": (
+                PreCommitRepo(
+                    repo="https://repo1.local/test",
+                    rev="rev1",
+                    hooks=[
+                        PreCommitHook("1st-hook", ["dep", "other==0.42"]),
+                        PreCommitHook("2nd-hook", ["dep", "other>=0.42"]),
+                    ],
+                ),
+                PreCommitRepo(
+                    repo="https://repo1.local/test",
+                    rev="rev2",
+                    hooks=[
+                        PreCommitHook("1st-hook", ["dep==0.1.2", "other==3.4.5"]),
+                        PreCommitHook("2st-hook", ["dep==0.1.2", "other==3.4.5"]),
+                    ],
+                ),
+            )
+        }
+    )
+    captured = capsys.readouterr()
+    # Remove all <..> tags, as we don't have the real parser
+    out = re.sub(r"<[^>]*>", "", captured.out)
+
+    assert "[sync-pre-commit-lock]  • https://repo1.local/test   rev1   -> rev2" in out
+    assert "[sync-pre-commit-lock]    ├ 1st-hook" in out
+    assert "[sync-pre-commit-lock]    │ ├ dep                    *      -> 0.1.2" in out
+    assert "[sync-pre-commit-lock]    │ └ other                  0.42   -> 3.4.5" in out
+    assert "[sync-pre-commit-lock]    └ 2nd-hook" in out
+    assert "[sync-pre-commit-lock]      ├ dep                    *      -> 0.1.2" in out
+    assert "[sync-pre-commit-lock]      └ other                  >=0.42 -> 3.4.5" in out
 
 
 def test_direct_command_invocation():

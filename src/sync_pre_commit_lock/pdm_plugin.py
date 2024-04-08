@@ -3,6 +3,7 @@ from __future__ import annotations
 from collections.abc import Iterable
 from typing import TYPE_CHECKING, Any, ClassVar, Union
 
+from packaging.requirements import Requirement
 from pdm import termui
 from pdm.__version__ import __version__ as pdm_version
 from pdm.cli.commands.base import BaseCommand
@@ -29,7 +30,7 @@ if TYPE_CHECKING:
     from pdm.project import Project
     from pdm.termui import UI
 
-    from sync_pre_commit_lock.pre_commit_config import PreCommitRepo
+    from sync_pre_commit_lock.pre_commit_config import PreCommitHook, PreCommitRepo
 
 
 class PDMPrinter(Printer):
@@ -61,23 +62,59 @@ class PDMPrinter(Printer):
     def _format_repo_url(self, repo_url: str, package_name: str) -> str:
         return repo_url.replace(package_name, f"[cyan][bold]{package_name}[/bold][/cyan]")
 
-    def list_updated_packages(self, packages: dict[str, tuple[PreCommitRepo, str]]) -> None:
+    def list_updated_packages(self, packages: dict[str, tuple[PreCommitRepo, PreCommitRepo]]) -> None:
         """
         Args:
             packages: Dict of package name -> (repo, new_rev)
         """
         self.ui.display_columns(
-            [
-                (
-                    "[info]" + self.plugin_prefix + "[/info]" + " " + self.success_list_token,
-                    "[info]" + self._format_repo_url(repo[0].repo, package) + "[/info]",
-                    " ",
-                    "[error]" + repo[0].rev + "[/error]",
-                    "[info]" + "->" + "[/info]",
-                    "[green]" + repo[1] + "[/green]",
-                )
-                for package, repo in packages.items()
-            ]
+            [row for package, (old, new) in packages.items() for row in self._format_repo(package, old, new)]
+        )
+
+    def _format_repo(self, package: str, old: PreCommitRepo, new: PreCommitRepo) -> Sequence[Sequence[str]]:
+        new_version = new.rev != old.rev
+        repo = (
+            f"[info]{self.plugin_prefix}[/info] {self.success_list_token}",
+            f"[info]{self._format_repo_url(old.repo, package)}[/info]",
+            " ",
+            f"[error]{old.rev}[/error]" if new_version else "",
+            "[info]->[/info]" if new_version else "",
+            f"[green]{new.rev}[/green]" if new_version else "",
+        )
+        nb_hooks = len(old.hooks)
+        hooks = [
+            row
+            for idx, (old_hook, new_hook) in enumerate(zip(old.hooks, new.hooks))
+            for row in self._format_hook(old_hook, new_hook, idx + 1 == nb_hooks)
+        ]
+        return [repo, *hooks] if hooks else [repo]
+
+    def _format_hook(self, old: PreCommitHook, new: PreCommitHook, last: bool) -> Sequence[Sequence[str]]:
+        if not (nb_deps := len(old.additional_dependencies)):
+            return []
+        hook = (
+            f"[info]{self.plugin_prefix}[/info]",
+            f"{'└' if last else '├'} [cyan][bold]{old.id}[/bold][/cyan]",
+            "",
+            "",
+            "",
+        )
+        dependencies = [
+            self._format_additional_dependency(old_dep, new_dep, " " if last else "│", idx + 1 == nb_deps)
+            for idx, (old_dep, new_dep) in enumerate(zip(old.additional_dependencies, new.additional_dependencies))
+        ]
+        return (hook, *dependencies)
+
+    def _format_additional_dependency(self, old: str, new: str, prefix: str, last: bool) -> Sequence[str]:
+        old_req = Requirement(old)
+        new_req = Requirement(new)
+        return (
+            f"[info]{self.plugin_prefix}[/info]",
+            f"{prefix} {'└' if last else '├'} [cyan][bold]{old_req.name}[/bold][/cyan]",
+            " ",
+            f"[error]{str(old_req.specifier).lstrip('==') or '*'}[/error]",
+            "[info]->[/info]",
+            f"[green]{str(new_req.specifier).lstrip('==')}[/green]",
         )
 
 

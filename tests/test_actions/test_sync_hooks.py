@@ -1,6 +1,8 @@
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
+import pytest
+
 from sync_pre_commit_lock import Printer
 from sync_pre_commit_lock.actions.sync_hooks import (
     GenericLockedPackage,
@@ -8,7 +10,7 @@ from sync_pre_commit_lock.actions.sync_hooks import (
 )
 from sync_pre_commit_lock.config import SyncPreCommitLockConfig
 from sync_pre_commit_lock.db import PackageRepoMapping, RepoInfo
-from sync_pre_commit_lock.pre_commit_config import PreCommitHookConfig, PreCommitRepo
+from sync_pre_commit_lock.pre_commit_config import PreCommitHook, PreCommitHookConfig, PreCommitRepo
 
 
 def test_execute_returns_early_when_disabled() -> None:
@@ -223,7 +225,7 @@ def test_analyze_repos(mock_get_pre_commit_repo_new_version: MagicMock) -> None:
 
     to_fix, _ = syncer.analyze_repos(pre_commit_repos, mapping, mapping_reverse_by_url)
 
-    assert to_fix == {PreCommitRepo("https://repo_url", "1.2.3"): "2.0.0"}
+    assert to_fix == {PreCommitRepo("https://repo_url", "1.2.3"): PreCommitRepo("https://repo_url", "2.0.0")}
 
 
 def test_build_mapping() -> None:
@@ -292,6 +294,32 @@ def test_get_pre_commit_repo_new_version_version_match() -> None:
     new_version = syncer.get_pre_commit_repo_new_version(pre_commit_config_repo, mapping_db_repo_info, locked_package)
 
     assert new_version is None
+
+
+@pytest.mark.parametrize(
+    "dependency, expected",
+    [
+        pytest.param("dep==1.2.3", "dep==1.2.3", id="same"),
+        pytest.param("dep", "dep==1.2.3", id="locked"),
+        pytest.param("other", "other", id="not-in-lock"),
+        pytest.param("dep<>unparsable", "dep<>unparsable", id="unparsable"),
+    ],
+)
+def test_get_pre_commit_repo_hook_new_dependency(dependency: str, expected: str) -> None:
+    printer = MagicMock(spec=Printer)
+    pre_commit_config_file_path = MagicMock(spec=Path)
+    locked_packages: dict[str, GenericLockedPackage] = {"dep": GenericLockedPackage("dep", "1.2.3")}
+    plugin_config = MagicMock(spec=SyncPreCommitLockConfig)
+    plugin_config.ignore = []
+
+    syncer = SyncPreCommitHooksVersion(
+        printer=printer,
+        pre_commit_config_file_path=pre_commit_config_file_path,
+        locked_packages=locked_packages,
+        plugin_config=plugin_config,
+    )
+
+    assert syncer.get_pre_commit_repo_hook_new_dependency(dependency) == expected
 
 
 def test_analyze_repos_repo_not_in_mapping() -> None:
@@ -382,3 +410,27 @@ def test_analyze_repos_local() -> None:
     result, _ = syncer.analyze_repos(pre_commit_repos, mapping, mapping_reverse_by_url)
 
     assert result == {}
+
+
+def test_analyze_repos_additional_dependencies() -> None:
+    printer = MagicMock(spec=Printer)
+    pre_commit_config_file_path = MagicMock(spec=Path)
+    locked_packages: dict[str, GenericLockedPackage] = {"lib_name": GenericLockedPackage("lib_name", "2.0.0")}
+    plugin_config = SyncPreCommitLockConfig()
+
+    syncer = SyncPreCommitHooksVersion(
+        printer=printer,
+        pre_commit_config_file_path=pre_commit_config_file_path,
+        locked_packages=locked_packages,
+        plugin_config=plugin_config,
+    )
+    pre_commit_repo = PreCommitRepo("https://repo_url", "1.2.3", [PreCommitHook("hook", ["lib_name==1.2.2"])])
+    pre_commit_repos = {pre_commit_repo}
+    mapping: PackageRepoMapping = {"lib_name": {"repo": "https://repo_url", "rev": "${rev}"}}
+    mapping_reverse_by_url = {"https://repo_url": "lib_name"}
+
+    to_fix, _ = syncer.analyze_repos(pre_commit_repos, mapping, mapping_reverse_by_url)
+
+    assert to_fix == {
+        pre_commit_repo: PreCommitRepo("https://repo_url", "2.0.0", [PreCommitHook("hook", ["lib_name==2.0.0"])])
+    }

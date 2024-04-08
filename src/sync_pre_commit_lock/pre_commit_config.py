@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 import difflib
+from dataclasses import dataclass, field
 from functools import cached_property
-from typing import TYPE_CHECKING, Any, NamedTuple
+from typing import TYPE_CHECKING, Any
 
 import strictyaml as yaml
 from strictyaml import Any as AnyStrictYaml
@@ -11,6 +12,7 @@ from strictyaml import MapCombined, Optional, Seq, Str
 from sync_pre_commit_lock.utils import normalize_git_url
 
 if TYPE_CHECKING:
+    from collections.abc import Sequence
     from pathlib import Path
 
 schema = MapCombined(
@@ -20,6 +22,16 @@ schema = MapCombined(
                 {
                     "repo": Str(),
                     Optional("rev"): Str(),
+                    Optional("hooks"): Seq(
+                        MapCombined(
+                            {
+                                "id": Str(),
+                                Optional("additional_dependencies"): Seq(Str()),
+                            },
+                            Str(),
+                            AnyStrictYaml(),
+                        )
+                    ),
                 },
                 Str(),
                 AnyStrictYaml(),
@@ -31,9 +43,41 @@ schema = MapCombined(
 )
 
 
-class PreCommitRepo(NamedTuple):
+@dataclass(frozen=True)
+class PreCommitHook:
+    id: str
+    additional_dependencies: Sequence[str] = field(default_factory=tuple)
+
+    def __hash__(self) -> int:
+        return hash((self.id, *self.additional_dependencies))
+
+    def __eq__(self, other: object) -> bool:
+        return (
+            isinstance(other, PreCommitHook)
+            and other.id == self.id
+            and all(
+                other_dep == self_dep
+                for other_dep, self_dep in zip(other.additional_dependencies, self.additional_dependencies)
+            )
+        )
+
+
+@dataclass(frozen=True)
+class PreCommitRepo:
     repo: str
     rev: str  # Check if is not loaded as float/int/other yolo
+    hooks: Sequence[PreCommitHook] = field(default_factory=tuple)
+
+    def __hash__(self) -> int:
+        return hash((self.repo, self.rev, *[hook.__hash__() for hook in self.hooks]))
+
+    def __eq__(self, other: object) -> bool:
+        return (
+            isinstance(other, PreCommitRepo)
+            and other.repo == self.repo
+            and other.rev == self.rev
+            and all(other_hook == self_hook for other_hook, self_hook in zip(other.hooks, self.hooks))
+        )
 
 
 class PreCommitHookConfig:
@@ -68,12 +112,28 @@ class PreCommitHookConfig:
     def repos(self) -> list[PreCommitRepo]:
         """Return the repos, excluding local repos."""
         return [
-            PreCommitRepo(repo=repo["repo"], rev=repo["rev"]) for repo in (self.data["repos"] or []) if "rev" in repo
+            PreCommitRepo(
+                repo=repo["repo"],
+                rev=repo["rev"],
+                hooks=tuple(
+                    PreCommitHook(hook["id"], hook.get("additional_dependencies", tuple()))
+                    for hook in repo.get("hooks", tuple())
+                ),
+            )
+            for repo in (self.data["repos"] or [])
+            if "rev" in repo
         ]
 
     @cached_property
     def repos_normalized(self) -> set[PreCommitRepo]:
-        return {PreCommitRepo(repo=normalize_git_url(repo.repo), rev=repo.rev) for repo in self.repos}
+        return {
+            PreCommitRepo(
+                repo=normalize_git_url(repo.repo),
+                rev=repo.rev,
+                hooks=repo.hooks,
+            )
+            for repo in self.repos
+        }
 
     @cached_property
     def document_start_offset(self) -> int:
@@ -90,7 +150,7 @@ class PreCommitHookConfig:
                 return i + 1
         return 0
 
-    def update_pre_commit_repo_versions(self, new_versions: dict[PreCommitRepo, str]) -> None:
+    def update_pre_commit_repo_versions(self, new_versions: dict[PreCommitRepo, PreCommitRepo]) -> None:
         """Fix the pre-commit hooks to match the lockfile. Preserve comments and formatting as much as possible."""
         if len(new_versions) == 0:
             return
@@ -102,15 +162,37 @@ class PreCommitHookConfig:
             if "rev" not in repo_rev:
                 continue
 
-            repo, rev = repo_rev["repo"], repo_rev["rev"]
-            normalized_repo = PreCommitRepo(normalize_git_url(str(repo)), str(rev))
-            if normalized_repo not in new_versions:
+            repo, rev, hooks = repo_rev["repo"], repo_rev["rev"], repo_rev.get("hooks", tuple())
+            normalized_repo = PreCommitRepo(
+                normalize_git_url(str(repo)),
+                str(rev),
+                tuple(
+                    PreCommitHook(str(hook["id"]), [str(dep) for dep in hook.get("additional_dependencies", tuple())])
+                    for hook in hooks
+                ),
+            )
+            if not (updated_repo := new_versions.get(normalized_repo)):
                 continue
 
             rev_line_number: int = rev.end_line + self.document_start_offset
             rev_line_idx: int = rev_line_number - 1
             original_rev_line: str = updated_lines[rev_line_idx]
-            updated_lines[rev_line_idx] = original_rev_line.replace(str(rev), new_versions[normalized_repo])
+            updated_lines[rev_line_idx] = original_rev_line.replace(str(rev), updated_repo.rev)
+
+            for src_hook, old_hook, new_hook in zip(hooks, normalized_repo.hooks, updated_repo.hooks):
+                if new_hook == old_hook:
+                    continue
+                for src_dep, old_dep, new_dep in zip(
+                    src_hook.get("additional_dependencies", []),
+                    old_hook.additional_dependencies,
+                    new_hook.additional_dependencies,
+                ):
+                    if old_dep == new_dep:
+                        continue
+                    dep_line_number: int = src_dep.end_line + self.document_start_offset
+                    dep_line_idx: int = dep_line_number - 1
+                    original_dep_line: str = updated_lines[dep_line_idx]
+                    updated_lines[dep_line_idx] = original_dep_line.replace(str(src_dep), new_dep)
 
         changes = difflib.ndiff(original_lines, updated_lines)
         change_count = sum(1 for change in changes if change[0] in ["+", "-"])

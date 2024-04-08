@@ -4,7 +4,8 @@ from unittest.mock import MagicMock, mock_open
 import pytest
 import yaml
 from strictyaml.exceptions import YAMLValidationError
-from sync_pre_commit_lock.pre_commit_config import PreCommitHookConfig, PreCommitRepo
+
+from sync_pre_commit_lock.pre_commit_config import PreCommitHook, PreCommitHookConfig, PreCommitRepo
 
 
 def test_pre_commit_hook_config_initialization() -> None:
@@ -67,16 +68,125 @@ def test_files_offset(path: Path, offset: int) -> None:
     assert config.document_start_offset == offset
 
 
-def test_update_versions():
+def test_update_versions() -> None:
     config = PreCommitHookConfig.from_yaml_file(FIXTURES / "pre-commit-config-document-separator.yaml")
     config.pre_commit_config_file_path = MagicMock()
 
-    config.update_pre_commit_repo_versions({PreCommitRepo("https://github.com/psf/black", "23.2.0"): "23.3.0"})
+    initial_repo = PreCommitRepo("https://github.com/psf/black", "23.2.0", [PreCommitHook("black")])
+    updated_repo = PreCommitRepo("https://github.com/psf/black", "23.3.0", [PreCommitHook("black")])
+    config.update_pre_commit_repo_versions({initial_repo: updated_repo})
     assert config.pre_commit_config_file_path.open.call_args[0][0] == "w"
 
     config.update_pre_commit_repo_versions({})
     assert config.pre_commit_config_file_path.open.call_count == 1
 
     with pytest.raises(RuntimeError):
-        config.update_pre_commit_repo_versions({PreCommitRepo("https://github.com/psf/notexist", "23.2.0"): "23.3.0"})
+        config.update_pre_commit_repo_versions(
+            {PreCommitRepo("https://github.com/psf/notexist", "23.2.0"): updated_repo}
+        )
         assert config.pre_commit_config_file_path.open.call_count == 1
+
+
+@pytest.mark.parametrize("base", ["with-deps", "with-one-liner-deps", "without-new-deps"])
+def test_update_additional_dependencies_versions(base: str) -> None:
+    config = PreCommitHookConfig.from_yaml_file(FIXTURES / f"pre-commit-config-{base}.yaml")
+    mock_file = config.pre_commit_config_file_path = MagicMock()
+    mock_file.open = mock_open()
+
+    initial_repo = config.repos[0]
+    updated_repo = PreCommitRepo(
+        "https://github.com/pre-commit/mirrors-mypy",
+        "v1.5.0",
+        [PreCommitHook("mypy", ["types-PyYAML==1.2.4", "types-requests==3.4.5"])],
+    )
+
+    config.update_pre_commit_repo_versions({initial_repo: updated_repo})
+
+    expected = (FIXTURES / f"pre-commit-config-{base}.expected.yaml").read_text()
+
+    mock_file.open().writelines.assert_called_once_with(expected.splitlines(keepends=True))
+
+
+# Syntactic sugar
+Repo = PreCommitRepo
+Hook = PreCommitHook
+
+
+@pytest.mark.parametrize(
+    "repo1,repo2,equal",
+    (
+        (Repo("https://some.url", "0.42"), Repo("https://some.url", "0.42"), True),
+        (Repo("https://some.url", "0.42", tuple()), Repo("https://some.url", "0.42", []), True),
+        (
+            Repo("https://some.url", "0.42", [Hook("hook")]),
+            Repo("https://some.url", "0.42", [Hook("hook")]),
+            True,
+        ),
+        (
+            Repo("https://some.url", "0.42", [Hook("hook", ["somelib"])]),
+            Repo("https://some.url", "0.42", [Hook("hook", ["somelib"])]),
+            True,
+        ),
+        (
+            Repo("https://some.url", "0.42", [Hook("hook", ("somelib",))]),
+            Repo("https://some.url", "0.42", [Hook("hook", ["somelib"])]),
+            True,
+        ),
+        (
+            Repo(
+                "https://some.url",
+                "0.42",
+                [
+                    Hook("1st-hook", ["somelib"]),
+                    Hook("2nd-hook", ["somelib", "another-lib"]),
+                ],
+            ),
+            Repo(
+                "https://some.url",
+                "0.42",
+                [
+                    Hook("1st-hook", ["somelib"]),
+                    Hook("2nd-hook", ["somelib", "another-lib"]),
+                ],
+            ),
+            True,
+        ),
+        (
+            Repo("https://some.url", "0.42"),
+            Repo("https://some.new.url", "0.42"),
+            False,
+        ),
+        (
+            Repo("https://some.url", "0.42"),
+            Repo("https://some.url", "0.43"),
+            False,
+        ),
+        (
+            Repo("https://some.url", "0.42", [Hook("hook", ["somelib==0.1"])]),
+            Repo("https://some.url", "0.42", [Hook("hook", ["somelib"])]),
+            False,
+        ),
+        (
+            Repo(
+                "https://some.url",
+                "0.42",
+                [
+                    Hook("1st-hook", ["somelib"]),
+                    Hook("2nd-hook", ["somelib", "another-lib"]),
+                ],
+            ),
+            Repo(
+                "https://some.url",
+                "0.42",
+                [
+                    Hook("1st-hook", ["somelib"]),
+                    Hook("2nd-hook", ["somelib==0.42", "another-lib"]),
+                ],
+            ),
+            False,
+        ),
+    ),
+)
+def test_precommit_repo_equality(repo1: PreCommitRepo, repo2: PreCommitRepo, equal: bool):
+    assert (repo1 == repo2) is equal
+    assert (hash(repo1) == hash(repo2)) is equal

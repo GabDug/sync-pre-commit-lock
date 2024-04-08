@@ -9,6 +9,7 @@ from cleo.events.console_terminate_event import ConsoleTerminateEvent
 from cleo.exceptions import CleoValueError
 from cleo.helpers import option
 from cleo.io.outputs.output import Verbosity
+from packaging.requirements import Requirement
 from poetry.__version__ import __version__ as poetry_version
 from poetry.console.application import Application
 from poetry.console.commands.add import AddCommand
@@ -30,7 +31,7 @@ if TYPE_CHECKING:
     from cleo.events.event_dispatcher import EventDispatcher
     from cleo.io.io import IO
 
-    from sync_pre_commit_lock.pre_commit_config import PreCommitRepo
+    from sync_pre_commit_lock.pre_commit_config import PreCommitHook, PreCommitRepo
 
 
 class PoetryPrinter(Printer):
@@ -55,29 +56,65 @@ class PoetryPrinter(Printer):
     def success(self, msg: str) -> None:
         return self.io.write_line(f"<success>{self.plugin_prefix} {msg}</success>", verbosity=Verbosity.NORMAL)
 
-    def list_updated_packages(self, packages: dict[str, tuple[PreCommitRepo, str]]) -> None:
+    def list_updated_packages(self, packages: dict[str, tuple[PreCommitRepo, PreCommitRepo]]) -> None:
         from cleo.ui.table import Table
 
         table = Table(self.io, style="compact")
 
         table.set_rows(
-            [
-                [
-                    "<info>" + self.plugin_prefix + " " + self.success_list_token,
-                    self._format_repo_url(repo[0].repo, package),
-                    " ",
-                    "<warning>" + repo[0].rev + "</>",
-                    "->",
-                    "<success>" + repo[1] + "</>" + "</>",
-                ]
-                for package, repo in packages.items()
-            ]
+            [list(row) for package, (old, new) in packages.items() for row in self._format_repo(package, old, new)]
         )
 
         table.render()
 
+    def _format_repo(self, package: str, old: PreCommitRepo, new: PreCommitRepo) -> Sequence[Sequence[str]]:
+        new_version = new.rev != old.rev
+        repo = (
+            f"<info>{self.plugin_prefix} {self.success_list_token}",
+            self._format_repo_url(old.repo, package),
+            " ",
+            f"<warning>{old.rev}</>" if new_version else "",
+            "->" if new_version else "",
+            f"<success>{new.rev}</></>" if new_version else "</>",
+        )
+        nb_hooks = len(old.hooks)
+        hooks = [
+            row
+            for idx, (old_hook, new_hook) in enumerate(zip(old.hooks, new.hooks))
+            for row in self._format_hook(old_hook, new_hook, idx + 1 == nb_hooks)
+        ]
+        return [repo, *hooks] if hooks else [repo]
+
     def _format_repo_url(self, repo_url: str, package_name: str) -> str:
         return repo_url.replace(package_name, f"<c1>{package_name}</>")
+
+    def _format_hook(self, old: PreCommitHook, new: PreCommitHook, last: bool) -> Sequence[Sequence[str]]:
+        if not (nb_deps := len(old.additional_dependencies)):
+            return []
+        hook = (
+            f"<info>{self.plugin_prefix}</>",
+            f"{'└' if last else '├'} <c1>{old.id}</>",
+            "",
+            "",
+            "",
+        )
+        dependencies = [
+            self._format_additional_dependency(old_dep, new_dep, " " if last else "│", idx + 1 == nb_deps)
+            for idx, (old_dep, new_dep) in enumerate(zip(old.additional_dependencies, new.additional_dependencies))
+        ]
+        return (hook, *dependencies)
+
+    def _format_additional_dependency(self, old: str, new: str, prefix: str, last: bool) -> Sequence[str]:
+        old_req = Requirement(old)
+        new_req = Requirement(new)
+        return (
+            f"<info>{self.plugin_prefix}</>",
+            f"{prefix} {'└' if last else '├'} <c1>{old_req.name}</>",
+            " ",
+            f"<warning>{str(old_req.specifier).lstrip('==') or '*'}</>",
+            "<info>-></>",
+            f"<success>{str(new_req.specifier).lstrip('==')}</>",
+        )
 
 
 class PoetrySetupPreCommitHooks(SetupPreCommitHooks):
