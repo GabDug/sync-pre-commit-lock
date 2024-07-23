@@ -44,8 +44,8 @@ class SetupPreCommitHooks:
     def _install_pre_commit_hooks(self) -> None:
         try:
             self.printer.info("Installing pre-commit hooks...")
-            return_code = subprocess.check_call(
-                self.install_pre_commit_hooks_command,  # noqa: S603
+            return_code = subprocess.check_call(  # noqa: S603
+                self.install_pre_commit_hooks_command,
                 # XXX We probably want to see the output, at least in verbose mode or if it fails
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
@@ -61,8 +61,8 @@ class SetupPreCommitHooks:
     def _is_pre_commit_package_installed(self) -> bool:
         try:
             # Try is `pre-commit --version` works
-            output = subprocess.check_output(
-                self.check_pre_commit_version_command,  # noqa: S603
+            output = subprocess.check_output(  # noqa: S603
+                self.check_pre_commit_version_command,
             ).decode()
         except (subprocess.CalledProcessError, FileNotFoundError):
             return False
@@ -75,8 +75,8 @@ class SetupPreCommitHooks:
 
     def _get_git_directory_path(self) -> Path | None:
         try:
-            result = subprocess.check_output(
-                ["git", "rev-parse", "--show-toplevel"],  # noqa: S603, S607
+            result = subprocess.check_output(  # noqa: S603
+                ["git", "rev-parse", "--show-toplevel"],  # noqa: S607
                 stderr=subprocess.PIPE,
             )
             return Path(result.decode().strip()) / ".git"

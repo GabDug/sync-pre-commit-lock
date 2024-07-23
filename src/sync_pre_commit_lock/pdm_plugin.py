@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, ClassVar
+from collections.abc import Iterable
+from typing import TYPE_CHECKING, Any, ClassVar, Union
 
 from pdm import termui
 from pdm.cli.commands.base import BaseCommand
@@ -117,9 +118,19 @@ def on_pdm_install_setup_pre_commit(
     action.execute()
 
 
+if TYPE_CHECKING:
+    Resolution = Union[dict[str, list[Candidate]], dict[str, Candidate]]
+
+
+def select_candidate(candidate: Union[Candidate, list[Candidate]]) -> Candidate | None:
+    if isinstance(candidate, Iterable):
+        return next(iter(candidate), None)
+    return candidate
+
+
 @post_lock.connect
 def on_pdm_lock_check_pre_commit(
-    project: Project, *, resolution: dict[str, Candidate], dry_run: bool, with_prefix: bool = True, **kwargs: Any
+    project: Project, *, resolution: Resolution, dry_run: bool, with_prefix: bool = True, **kwargs: Any
 ) -> None:
     project_root: Path = project.root
     plugin_config: SyncPreCommitLockConfig = load_config(project_root / project.PYPROJECT_FILENAME)
@@ -127,7 +138,9 @@ def on_pdm_lock_check_pre_commit(
 
     file_path = project_root / plugin_config.pre_commit_config_file
     resolved_packages: dict[str, GenericLockedPackage] = {
-        k: GenericLockedPackage(v.name, v.version) for k, v in resolution.items() if v.name and v.version
+        k: GenericLockedPackage(c.name, c.version)
+        for k, v in resolution.items()
+        if (c := select_candidate(v)) and c.name and c.version
     }
     action = SyncPreCommitHooksVersion(
         printer=printer,

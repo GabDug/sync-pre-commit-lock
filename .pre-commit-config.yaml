@@ -46,7 +46,7 @@ repos:
         verbose: true
         files: ^db\.py|README\.md$
 
-  - rev: v0.3.5
+  - rev: v0.5.4
     repo: https://github.com/astral-sh/ruff-pre-commit
     hooks:
       - id: ruff
@@ -54,6 +54,6 @@ repos:
       - id: ruff-format
 
   - repo: https://github.com/pdm-project/pdm
-    rev: 2.13.2
+    rev: 2.17.1
     hooks:
       - id: pdm-lock-check
