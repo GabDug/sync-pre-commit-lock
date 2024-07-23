@@ -133,6 +133,8 @@ Here is the list of default packages supported by this plugin, from [`db.py`](ht
 - [flakeheaven](https://github.com/flakeheaven/flakeheaven)
 - [isort](https://github.com/pycqa/isort)
 - [mypy](https://github.com/pre-commit/mirrors-mypy)
+- [pdm](https://github.com/pdm-project/pdm)
+- [poetry](https://github.com/python-poetry/poetry)
 - [pycln](https://github.com/hadialqattan/pycln)
 - [pyroma](https://github.com/regebro/pyroma)
 - [pyupgrade](https://github.com/asottile/pyupgrade)
