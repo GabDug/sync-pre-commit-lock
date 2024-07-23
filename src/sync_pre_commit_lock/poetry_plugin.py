@@ -9,6 +9,7 @@ from cleo.events.console_terminate_event import ConsoleTerminateEvent
 from cleo.exceptions import CleoValueError
 from cleo.helpers import option
 from cleo.io.outputs.output import Verbosity
+from poetry.__version__ import __version__ as poetry_version
 from poetry.console.application import Application
 from poetry.console.commands.add import AddCommand
 from poetry.console.commands.install import InstallCommand
@@ -89,6 +90,8 @@ def run_sync_pre_commit_version(printer: PoetryPrinter, dry_run: bool, applicati
     locked_packages = {str(p.name): GenericLockedPackage(p.name, str(p.version)) for p in poetry_locked_packages}
     plugin_config = load_config(application.poetry.pyproject_path)
     file_path = Path().cwd() / plugin_config.pre_commit_config_file
+    # Add poetry itself as it won't be part of the resolved dependencies
+    locked_packages["poetry"] = GenericLockedPackage("poetry", poetry_version)
 
     SyncPreCommitHooksVersion(
         printer,
