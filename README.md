@@ -143,6 +143,8 @@ Here is the list of default packages supported by this plugin, from [`db.py`](ht
 - [yamllint](https://github.com/adrienverge/yamllint)
 <!-- END-GENERATED-PACKAGES-LIST -->
 
+> Note: `pdm` or `poetry` version will be added, from the current instance version, and not from the lockfile.
+
 ## Improvement ideas
 
 Feel free to open an issue or a PR if you have any idea, or if you want to help!
