@@ -133,6 +133,8 @@ Here is the list of default packages supported by this plugin, from [`db.py`](ht
 - [flakeheaven](https://github.com/flakeheaven/flakeheaven)
 - [isort](https://github.com/pycqa/isort)
 - [mypy](https://github.com/pre-commit/mirrors-mypy)
+- [pdm](https://github.com/pdm-project/pdm)
+- [poetry](https://github.com/python-poetry/poetry)
 - [pycln](https://github.com/hadialqattan/pycln)
 - [pyroma](https://github.com/regebro/pyroma)
 - [pyupgrade](https://github.com/asottile/pyupgrade)
@@ -140,6 +142,8 @@ Here is the list of default packages supported by this plugin, from [`db.py`](ht
 - [ruff](https://github.com/astral-sh/ruff-pre-commit)
 - [yamllint](https://github.com/adrienverge/yamllint)
 <!-- END-GENERATED-PACKAGES-LIST -->
+
+> Note: `pdm` or `poetry` version will be added, from the current instance version, and not from the lockfile.
 
 ## Improvement ideas
 

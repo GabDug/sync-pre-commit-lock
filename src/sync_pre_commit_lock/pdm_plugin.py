@@ -4,6 +4,7 @@ from collections.abc import Iterable
 from typing import TYPE_CHECKING, Any, ClassVar, Union
 
 from pdm import termui
+from pdm.__version__ import __version__ as pdm_version
 from pdm.cli.commands.base import BaseCommand
 from pdm.cli.options import dry_run_option
 from pdm.signals import post_install, post_lock
@@ -142,6 +143,8 @@ def on_pdm_lock_check_pre_commit(
         for k, v in resolution.items()
         if (c := select_candidate(v)) and c.name and c.version
     }
+    # Adds pdm itself has it won't be part of the resolved dependencies
+    resolved_packages["pdm"] = GenericLockedPackage("pdm", pdm_version)
     action = SyncPreCommitHooksVersion(
         printer=printer,
         pre_commit_config_file_path=file_path,

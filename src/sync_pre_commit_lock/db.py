@@ -63,6 +63,14 @@ DEPENDENCY_MAPPING: PackageRepoMapping = {
         "repo": "https://github.com/pre-commit/mirrors-mypy",
         "rev": "v${rev}",
     },
+    "pdm": {
+        "repo": "https://github.com/pdm-project/pdm",
+        "rev": "${rev}",
+    },
+    "poetry": {
+        "repo": "https://github.com/python-poetry/poetry",
+        "rev": "${rev}",
+    },
     "pycln": {
         "repo": "https://github.com/hadialqattan/pycln",
         "rev": "v${rev}",
