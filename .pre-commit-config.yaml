@@ -57,3 +57,11 @@ repos:
     rev: 2.17.1
     hooks:
       - id: pdm-lock-check
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.8.0
+    hooks:
+      - id: mypy
+        # additional_dependencies: toto
+        additional_dependencies: ['black', "types-PyYAML==6.0.12.2; python_version >= '3.9'",
+        "ruff-=fail"]

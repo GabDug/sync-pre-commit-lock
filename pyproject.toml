@@ -33,6 +33,7 @@ dependencies = [
   "strictyaml>=1.7.3",
   'tomli>=2; python_version < "3.11"',
   'typing-extensions; python_version < "3.10"',
+  'packaging>=24.0',
 ]
 [project.optional-dependencies]
 pdm = [

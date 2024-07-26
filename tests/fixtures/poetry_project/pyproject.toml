@@ -8,6 +8,7 @@ packages = [{include = "sample_poetry_project"}]
 
 [tool.poetry.dependencies]
 python = "^3.11"
+pytest = "^7.4.2"
 
 
 [tool.poetry.group.dev.dependencies]

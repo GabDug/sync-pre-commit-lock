@@ -2,7 +2,16 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, NamedTuple
 
-from sync_pre_commit_lock.db import DEPENDENCY_MAPPING, REPOSITORY_ALIASES, PackageRepoMapping, RepoInfo
+from packaging.requirements import InvalidRequirement, Requirement
+from packaging.specifiers import SpecifierSet
+from packaging.utils import canonicalize_name
+
+from sync_pre_commit_lock.db import (
+    DEPENDENCY_MAPPING,
+    REPOSITORY_ALIASES,
+    PackageRepoMapping,
+    RepoInfo,
+)
 from sync_pre_commit_lock.pre_commit_config import PreCommitHookConfig, PreCommitRepo
 
 if TYPE_CHECKING:
@@ -56,15 +65,18 @@ class SyncPreCommitHooksVersion:
         if len(to_fix) == 0 and len(in_sync) == 0:
             self.printer.info("No pre-commit hook detected that matches a locked package.")
             return
-        if len(to_fix) == 0:
+
+        additional_deps_to_fix = self.analyze_additionnal_dependencies(pre_commit_config_data.repos_normalized)
+
+        if len(to_fix) == 0 and len(additional_deps_to_fix) == 0:
             packages_str = ", ".join(f"{mapping_reverse_by_url[repo.repo]} ({rev})" for repo, rev in in_sync.items())
             self.printer.info(f"All pre-commit hooks are already up to date with the lockfile: {packages_str}")
             return
 
-        self.printer.info("Detected pre-commit hooks that can be updated to match the lockfile:")
-        self.printer.list_updated_packages(
-            {mapping_reverse_by_url[repo.repo]: (repo, new_ver) for repo, new_ver in to_fix.items()}
-        )
+        # self.printer.info("Detected pre-commit hooks that can be updated to match the lockfile:")
+        # self.printer.list_updated_packages(
+        #     {mapping_reverse_by_url[repo.repo]: (repo, new_ver) for repo, new_ver in to_fix.items()}
+        # )
 
         if self.dry_run:
             self.printer.info("Dry run, skipping pre-commit hook update.")
@@ -101,7 +113,10 @@ class SyncPreCommitHooksVersion:
 
     def build_mapping(self) -> tuple[PackageRepoMapping, dict[str, str]]:
         """Merge the default mapping with the user-provided mapping. Also build a reverse mapping by URL."""
-        mapping: PackageRepoMapping = {**DEPENDENCY_MAPPING, **self.plugin_config.dependency_mapping}
+        mapping: PackageRepoMapping = {
+            **DEPENDENCY_MAPPING,
+            **self.plugin_config.dependency_mapping,
+        }
         mapping_reverse_by_url = {repo["repo"]: lib_name for lib_name, repo in mapping.items()}
         for canonical_name, aliases in REPOSITORY_ALIASES.items():
             for alias in aliases:
@@ -117,7 +132,7 @@ class SyncPreCommitHooksVersion:
     ) -> tuple[dict[PreCommitRepo, str], dict[PreCommitRepo, str]]:
         to_fix: dict[PreCommitRepo, str] = {}
         in_sync: dict[PreCommitRepo, str] = {}
-        for pre_commit_repo in pre_commit_repos:
+        for repo_idx, pre_commit_repo in enumerate(pre_commit_repos):
             if pre_commit_repo.repo not in mapping_reverse_by_url:
                 self.printer.debug(f"Pre-commit hook {pre_commit_repo.repo} not found in the DB mapping")
                 continue
@@ -141,10 +156,112 @@ class SyncPreCommitHooksVersion:
                 )
                 continue
 
+            # # If hooks have additional dependencies, we need to check if they are in sync
+            # if any("additional_dependencies" in hook for hook in pre_commit_repo.hooks):
+            #     print("Additional dependencies found")
+            #     add_deps = {hook["id"]: hook.get("additional_dependencies") for hook in pre_commit_repo.hooks}
+            #     # CHeck if packages are pep440 compliant
+            #     for hook_idx, hook in enumerate(pre_commit_repo.hooks):
+            #         hook_id = hook["id"]
+            #         additional_dependencies = hook.get("additional_dependencies")
+            #         if not additional_dependencies:
+            #             continue
+
+            #         print(f"Checking additional dependencies for {hook_id}: {additional_dependencies}")
+
+            #         # for requirements in additional_dependencies:
+            #         for idx, requirement in enumerate(additional_dependencies):
+            #             try:
+            #                 packaging_requirement = Requirement(requirement)
+            #             except InvalidRequirement:
+            #                 self.printer.debug(
+            #                     f"Pre-commit hook {pre_commit_repo.repo} has an invalid additional dependency {requirement}. Ignoring."
+            #                 )
+            #                 continue
+            #             pkg_name = canonicalize_name(packaging_requirement.name)
+            #             locked_version = self.locked_packages.get(pkg_name)
+            #             if not locked_version:
+            #                 self.printer.debug(
+            #                     f"Pre-commit hook {pre_commit_repo.repo} has an additional dependency {pkg_name}, "
+            #                     "but was not found in the lockfile. Ignoring."
+            #                 )
+            #                 continue
+            #             if packaging_requirement.specifier != SpecifierSet(f"=={locked_version.version}"):
+            #                 self.printer.debug(
+            #                     f"Pre-commit hook {pre_commit_repo.repo} has an additional dependency {pkg_name}, "
+            #                     f"but the locked version `{locked_version.version}` does not match the requirement `{packaging_requirement.specifier}`"
+            #                 )
+            #                 packaging_requirement.specifier = SpecifierSet(f"=={locked_version.version}")
+            #                 self.printer.debug(
+            #                     f"Updated the additional dependency to match the locked version: {str(packaging_requirement)}"
+            #                 )
+            #                 # Path of the requirement in the pre-commit config to change
+            #                 path = ["repos", pre_commit_repo.idx, "hooks", hook_idx, "additional_dependencies", idx]
+            #                 pre_commit_repo._changes[tuple(path)] = str(packaging_requirement)
+
             new_ver = self.get_pre_commit_repo_new_version(pre_commit_repo, dependency, dependency_locked)
             if new_ver:
                 to_fix[pre_commit_repo] = new_ver
             else:
                 in_sync[pre_commit_repo] = dependency_locked.version
-
+        # print(to_fix, in_sync)
         return to_fix, in_sync
+
+    def analyze_additionnal_dependencies(
+        self,
+        pre_commit_repos: set[PreCommitRepo],
+    ) -> list[PreCommitRepo]:
+        to_fix: list[PreCommitRepo] = []
+        for repo_idx, pre_commit_repo in enumerate(pre_commit_repos):
+            # If hooks have additional dependencies, we need to check if they are in sync
+            if any("additional_dependencies" in hook for hook in pre_commit_repo.hooks):
+                print("Additional dependencies found")
+                add_deps = {hook["id"]: hook.get("additional_dependencies") for hook in pre_commit_repo.hooks}
+                # CHeck if packages are pep440 compliant
+                for hook_idx, hook in enumerate(pre_commit_repo.hooks):
+                    hook_id = hook["id"]
+                    additional_dependencies = hook.get("additional_dependencies")
+                    if not additional_dependencies:
+                        continue
+
+                    print(f"Checking additional dependencies for {hook_id}: {additional_dependencies}")
+
+                    # for requirements in additional_dependencies:
+                    for idx, requirement in enumerate(additional_dependencies):
+                        try:
+                            packaging_requirement = Requirement(requirement)
+                        except InvalidRequirement:
+                            self.printer.debug(
+                                f"Pre-commit hook {pre_commit_repo.repo} has an invalid additional dependency {requirement}. Ignoring."
+                            )
+                            continue
+                        pkg_name = canonicalize_name(packaging_requirement.name)
+                        locked_version = self.locked_packages.get(pkg_name)
+                        if not locked_version:
+                            self.printer.debug(
+                                f"Pre-commit hook {pre_commit_repo.repo} has an additional dependency {pkg_name}, "
+                                "but was not found in the lockfile. Ignoring."
+                            )
+                            continue
+                        if packaging_requirement.specifier != SpecifierSet(f"=={locked_version.version}"):
+                            self.printer.debug(
+                                f"Pre-commit hook {pre_commit_repo.repo} has an additional dependency {pkg_name}, "
+                                f"but the locked version `{locked_version.version}` does not match the requirement `{packaging_requirement.specifier}`"
+                            )
+                            packaging_requirement.specifier = SpecifierSet(f"=={locked_version.version}")
+                            self.printer.debug(
+                                f"Updated the additional dependency to match the locked version: {str(packaging_requirement)}"
+                            )
+                            # Path of the requirement in the pre-commit config to change
+                            path = (
+                                "repos",
+                                pre_commit_repo.idx,
+                                "hooks",
+                                hook_idx,
+                                "additional_dependencies",
+                                idx,
+                            )
+                            pre_commit_repo._changes[path] = str(packaging_requirement)
+                            to_fix.append(pre_commit_repo)
+
+        return to_fix
