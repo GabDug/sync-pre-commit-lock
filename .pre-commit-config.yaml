@@ -32,7 +32,7 @@ repos:
       - id: tox-ini-fmt
 
   - repo: https://github.com/tox-dev/pyproject-fmt
-    rev: "1.7.0"
+    rev: "2.2.1"
     hooks:
       - id: pyproject-fmt
         additional_dependencies: ["tox>=4.14.1"]
@@ -46,7 +46,7 @@ repos:
         verbose: true
         files: ^db\.py|README\.md$
 
-  - rev: v0.5.4
+  - rev: v0.5.5
     repo: https://github.com/astral-sh/ruff-pre-commit
     hooks:
       - id: ruff
@@ -54,6 +54,6 @@ repos:
       - id: ruff-format
 
   - repo: https://github.com/pdm-project/pdm
-    rev: 2.17.1
+    rev: 2.17.3
     hooks:
       - id: pdm-lock-check
