@@ -25,6 +25,7 @@ if TYPE_CHECKING:
     from pdm.cli.hooks import HookManager
     from pdm.core import Core
     from pdm.models.candidates import Candidate
+    from pdm.models.repositories.lock import LockedRepository
     from pdm.project import Project
     from pdm.termui import UI
 
@@ -164,6 +165,12 @@ class SyncPreCommitVersionsPDMCommand(BaseCommand):
         dry_run_option.add_to_parser(parser)
 
     def handle(self, project: Project, options: argparse.Namespace) -> None:
-        candidates = project.locked_repository.all_candidates
+        candidates = self._get_locked_repository(project).all_candidates
 
         on_pdm_lock_check_pre_commit(project, resolution=candidates, dry_run=options.dry_run, with_prefix=False)
+
+    def _get_locked_repository(self, project: Project) -> LockedRepository:
+        # `locked_repository` was deprecated in PDM 2.17 favour of `get_locked_repository`, try to use it first to avoid warning
+        if hasattr(project, "get_locked_repository"):
+            return project.get_locked_repository()
+        return project.locked_repository
