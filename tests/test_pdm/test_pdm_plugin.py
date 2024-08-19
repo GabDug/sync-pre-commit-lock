@@ -128,7 +128,7 @@ def test_pdm_printer_list_success_repo_with_multiple_hooks_and_additional_depend
                     repo="https://repo1.local/test",
                     rev="rev1",
                     hooks=[
-                        PreCommitHook("1st-hook", ["dep", "other==0.42"]),
+                        PreCommitHook("1st-hook", ["dep==0.1.2", "other==0.42"]),
                         PreCommitHook("2nd-hook", ["dep", "other>=0.42"]),
                     ],
                 ),
@@ -147,7 +147,6 @@ def test_pdm_printer_list_success_repo_with_multiple_hooks_and_additional_depend
 
     assert "[sync-pre-commit-lock]  ✔ https://repo1.local/test   rev1   -> rev2" in captured.out
     assert "[sync-pre-commit-lock]    ├ 1st-hook" in captured.out
-    assert "[sync-pre-commit-lock]    │ ├ dep                    *      -> 0.1.2" in captured.out
     assert "[sync-pre-commit-lock]    │ └ other                  0.42   -> 3.4.5" in captured.out
     assert "[sync-pre-commit-lock]    └ 2nd-hook" in captured.out
     assert "[sync-pre-commit-lock]      ├ dep                    *      -> 0.1.2" in captured.out

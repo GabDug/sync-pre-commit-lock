@@ -193,7 +193,7 @@ def test_poetry_printer_list_success_with_multiple_hooks_and_additional_dependen
                     repo="https://repo1.local/test",
                     rev="rev1",
                     hooks=[
-                        PreCommitHook("1st-hook", ["dep", "other==0.42"]),
+                        PreCommitHook("1st-hook", ["dep==0.1.2", "other==0.42"]),
                         PreCommitHook("2nd-hook", ["dep", "other>=0.42"]),
                     ],
                 ),
@@ -214,7 +214,6 @@ def test_poetry_printer_list_success_with_multiple_hooks_and_additional_dependen
 
     assert "[sync-pre-commit-lock]  • https://repo1.local/test   rev1   -> rev2" in out
     assert "[sync-pre-commit-lock]    ├ 1st-hook" in out
-    assert "[sync-pre-commit-lock]    │ ├ dep                    *      -> 0.1.2" in out
     assert "[sync-pre-commit-lock]    │ └ other                  0.42   -> 3.4.5" in out
     assert "[sync-pre-commit-lock]    └ 2nd-hook" in out
     assert "[sync-pre-commit-lock]      ├ dep                    *      -> 0.1.2" in out

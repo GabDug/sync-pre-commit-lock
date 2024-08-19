@@ -4,6 +4,7 @@ from functools import cached_property
 from typing import TYPE_CHECKING, NamedTuple, Sequence
 
 from packaging.requirements import InvalidRequirement, Requirement
+from packaging.utils import canonicalize_name
 
 from sync_pre_commit_lock.db import DEPENDENCY_MAPPING, REPOSITORY_ALIASES, PackageRepoMapping
 from sync_pre_commit_lock.pre_commit_config import PreCommitHook, PreCommitHookConfig, PreCommitRepo
@@ -154,10 +155,11 @@ class SyncPreCommitHooksVersion:
         except InvalidRequirement:
             self.printer.debug(f"Invalid additional dependency {dependency}. Ignoring.")
             return dependency
-        if not (locked_version := self.locked_packages.get(requirement.name)):
+        normalized_name = canonicalize_name(requirement.name)
+        if not (locked_version := self.locked_packages.get(normalized_name)):
             self.printer.debug(f"Additional dependency {dependency} not found in the lockfile. Ignoring.")
             return dependency
-        return str(locked_version)
+        return str(locked_version).replace(normalized_name, requirement.name)
 
     def analyze_repos(
         self,
