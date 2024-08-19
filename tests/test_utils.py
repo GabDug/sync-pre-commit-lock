@@ -1,4 +1,5 @@
 import pytest
+
 from sync_pre_commit_lock.utils import normalize_git_url
 
 

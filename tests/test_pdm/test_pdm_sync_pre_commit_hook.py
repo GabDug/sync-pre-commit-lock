@@ -15,6 +15,7 @@ from pdm.models.candidates import Candidate
 from pdm.models.requirements import NamedRequirement
 from pdm.project import Project
 from pdm.termui import UI
+
 from sync_pre_commit_lock import (
     Printer,
 )

@@ -4,6 +4,7 @@ from unittest.mock import MagicMock, call
 
 import pytest
 from pytest_mock import MockerFixture
+
 from sync_pre_commit_lock import Printer
 from sync_pre_commit_lock.actions.install_hooks import SetupPreCommitHooks
 
