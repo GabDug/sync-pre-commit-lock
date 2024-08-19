@@ -151,3 +151,19 @@ def test_pdm_printer_list_success_repo_with_multiple_hooks_and_additional_depend
     assert "[sync-pre-commit-lock]    └ 2nd-hook" in captured.out
     assert "[sync-pre-commit-lock]      ├ dep                    *      -> 0.1.2" in captured.out
     assert "[sync-pre-commit-lock]      └ other                  >=0.42 -> 3.4.5" in captured.out
+
+
+def test_pdm_printer_list_success_renamed_repository(capsys: pytest.CaptureFixture[str]) -> None:
+    printer = PDMPrinter(UI())
+
+    printer.list_updated_packages(
+        {
+            "package": (
+                PreCommitRepo("https://old.repo.local/test", "rev1", [PreCommitHook("hook")]),
+                PreCommitRepo("https://new.repo.local/test", "rev2", [PreCommitHook("hook")]),
+            ),
+        }
+    )
+    captured = capsys.readouterr()
+
+    assert "[sync-pre-commit-lock]  ✔ https://{old -> new}.repo.local/test   rev1 -> rev2" in captured.out

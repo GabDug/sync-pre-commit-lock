@@ -23,6 +23,7 @@ from sync_pre_commit_lock import Printer
 from sync_pre_commit_lock.actions.install_hooks import SetupPreCommitHooks
 from sync_pre_commit_lock.actions.sync_hooks import GenericLockedPackage, SyncPreCommitHooksVersion
 from sync_pre_commit_lock.config import load_config
+from sync_pre_commit_lock.utils import url_diff
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -71,7 +72,7 @@ class PoetryPrinter(Printer):
         new_version = new.rev != old.rev
         repo = (
             f"<info>{self.plugin_prefix} {self.success_list_token}",
-            self._format_repo_url(old.repo, package),
+            self._format_repo_url(old.repo, new.repo, package),
             " ",
             f"<warning>{old.rev}</>" if new_version else "",
             "->" if new_version else "",
@@ -85,8 +86,9 @@ class PoetryPrinter(Printer):
         ]
         return [repo, *hooks] if hooks else [repo]
 
-    def _format_repo_url(self, repo_url: str, package_name: str) -> str:
-        return repo_url.replace(package_name, f"<c1>{package_name}</>")
+    def _format_repo_url(self, old_repo_url: str, new_repo_url: str, package_name: str) -> str:
+        url = url_diff(old_repo_url, new_repo_url, "<c1>{</><warning>", "</><c1> -> </><success>", "</><c1>}</>")
+        return url.replace(package_name, f"<c1>{package_name}</>")
 
     def _format_hook(self, old: PreCommitHook, new: PreCommitHook, last: bool) -> Sequence[Sequence[str]]:
         if not (nb_deps := len(old.additional_dependencies)):

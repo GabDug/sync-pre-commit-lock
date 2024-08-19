@@ -1,3 +1,4 @@
+from os.path import commonprefix
 from urllib.parse import urlparse, urlunparse
 
 
@@ -38,3 +39,14 @@ def normalize_git_url(url: str) -> str:
         normalized_url = normalized_url[:-1]
 
     return normalized_url
+
+
+def url_diff(old: str, new: str, diff_open: str = "{", diff_separator: str = " -> ", diff_close: str = "}") -> str:
+    """Represent a change of URL highliting only the changed part"""
+    if old == new:
+        return new
+    prefix = commonprefix((old, new))
+    old, new = old.removeprefix(prefix), new.removeprefix(prefix)
+    suffix = commonprefix((old[::-1], new[::-1]))[::-1]
+    old, new = old.removesuffix(suffix), new.removesuffix(suffix)
+    return f"{prefix}{diff_open}{old}{diff_separator}{new}{diff_close}{suffix}"

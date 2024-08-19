@@ -170,7 +170,7 @@ Feel free to open an issue or a PR if you have any idea, or if you want to help!
 - [ ] Check ref existence before writing?
 - [ ] New feature to convert from pre-commit online to local?
 - [ ] Warning if pre-commit CI auto update is also set?
-- [ ] Support automatic repository URL update (from legacy aliased repositories)
+- [x] Support automatic repository URL update (from legacy aliased repositories)
 
 
 ## Inspiration

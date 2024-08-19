@@ -138,6 +138,9 @@ class SyncPreCommitHooksVersion:
         )
         return None
 
+    def get_pre_commit_repo_new_url(self, url: str) -> str:
+        return self.mapping[self.mapping_reverse_by_url[url]]["repo"]
+
     def get_pre_commit_repo_new_hooks(self, hooks: Sequence[PreCommitHook]) -> Sequence[PreCommitHook]:
         return [self.get_pre_commit_repo_new_hook(hook) for hook in hooks]
 
@@ -173,7 +176,7 @@ class SyncPreCommitHooksVersion:
                 continue
 
             new_repo = PreCommitRepo(
-                repo=pre_commit_repo.repo,
+                repo=self.get_pre_commit_repo_new_url(pre_commit_repo.repo),
                 rev=self.get_pre_commit_repo_new_version(pre_commit_repo) or pre_commit_repo.rev,
                 hooks=self.get_pre_commit_repo_new_hooks(pre_commit_repo.hooks),
             )
