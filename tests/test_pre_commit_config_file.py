@@ -87,7 +87,7 @@ def test_update_versions() -> None:
         assert config.pre_commit_config_file_path.open.call_count == 1
 
 
-@pytest.mark.parametrize("base", ["with-deps", "with-one-liner-deps", "without-new-deps"])
+@pytest.mark.parametrize("base", ["only-deps", "with-deps", "with-one-liner-deps", "without-new-deps"])
 def test_update_additional_dependencies_versions(base: str) -> None:
     config = PreCommitHookConfig.from_yaml_file(FIXTURES / f"pre-commit-config-{base}.yaml")
     mock_file = config.pre_commit_config_file_path = MagicMock()
