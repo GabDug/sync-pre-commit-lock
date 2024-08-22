@@ -1,9 +1,13 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, NamedTuple
+from functools import cached_property
+from typing import TYPE_CHECKING, NamedTuple, Sequence
 
-from sync_pre_commit_lock.db import DEPENDENCY_MAPPING, REPOSITORY_ALIASES, PackageRepoMapping, RepoInfo
-from sync_pre_commit_lock.pre_commit_config import PreCommitHookConfig, PreCommitRepo
+from packaging.requirements import InvalidRequirement, Requirement
+from packaging.utils import canonicalize_name
+
+from sync_pre_commit_lock.db import DEPENDENCY_MAPPING, REPOSITORY_ALIASES, PackageRepoMapping
+from sync_pre_commit_lock.pre_commit_config import PreCommitHook, PreCommitHookConfig, PreCommitRepo
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -16,6 +20,9 @@ class GenericLockedPackage(NamedTuple):
     name: str
     version: str
     # Add original data here?
+
+    def __str__(self) -> str:
+        return f"{self.name}=={self.version}"
 
 
 class SyncPreCommitHooksVersion:
@@ -49,21 +56,22 @@ class SyncPreCommitHooksVersion:
             self.printer.error(f"Invalid pre-commit config file: {self.pre_commit_config_file_path}: {e}")
             return
 
-        mapping, mapping_reverse_by_url = self.build_mapping()
         # XXX We should have the list of packages mapped, but already up to date and print it
-        to_fix, in_sync = self.analyze_repos(pre_commit_config_data.repos_normalized, mapping, mapping_reverse_by_url)
+        to_fix, in_sync = self.analyze_repos(pre_commit_config_data.repos_normalized)
 
         if len(to_fix) == 0 and len(in_sync) == 0:
             self.printer.info("No pre-commit hook detected that matches a locked package.")
             return
         if len(to_fix) == 0:
-            packages_str = ", ".join(f"{mapping_reverse_by_url[repo.repo]} ({rev})" for repo, rev in in_sync.items())
+            packages_str = ", ".join(
+                f"{self.mapping_reverse_by_url[repo.repo]} ({rev})" for repo, rev in in_sync.items()
+            )
             self.printer.info(f"All pre-commit hooks are already up to date with the lockfile: {packages_str}")
             return
 
         self.printer.info("Detected pre-commit hooks that can be updated to match the lockfile:")
         self.printer.list_updated_packages(
-            {mapping_reverse_by_url[repo.repo]: (repo, new_ver) for repo, new_ver in to_fix.items()}
+            {self.mapping_reverse_by_url[repo.repo]: (repo, new_ver) for repo, new_ver in to_fix.items()}
         )
 
         if self.dry_run:
@@ -72,12 +80,43 @@ class SyncPreCommitHooksVersion:
         pre_commit_config_data.update_pre_commit_repo_versions(to_fix)
         self.printer.success(f"Pre-commit hooks have been updated in {self.pre_commit_config_file_path.name}!")
 
+    @cached_property
+    def mapping(self) -> PackageRepoMapping:
+        return {**DEPENDENCY_MAPPING, **self.plugin_config.dependency_mapping}
+
+    @cached_property
+    def mapping_reverse_by_url(self) -> dict[str, str]:
+        """Merge the default mapping with the user-provided mapping. Also build a reverse mapping by URL."""
+        mapping_reverse_by_url = {repo["repo"]: lib_name for lib_name, repo in self.mapping.items()}
+        for canonical_name, aliases in REPOSITORY_ALIASES.items():
+            if canonical_name in mapping_reverse_by_url:
+                for alias in aliases:
+                    mapping_reverse_by_url[alias] = mapping_reverse_by_url[canonical_name]
+        # XXX Allow override / extend of aliases
+        return mapping_reverse_by_url
+
     def get_pre_commit_repo_new_version(
         self,
         pre_commit_config_repo: PreCommitRepo,
-        mapping_db_repo_info: RepoInfo,
-        locked_package: GenericLockedPackage,
     ) -> str | None:
+        dependency = self.mapping[self.mapping_reverse_by_url[pre_commit_config_repo.repo]]
+        dependency_name = self.mapping_reverse_by_url[pre_commit_config_repo.repo]
+        locked_package = self.locked_packages.get(dependency_name)
+
+        if not locked_package:
+            self.printer.debug(
+                f"Pre-commit hook {pre_commit_config_repo.repo} has a mapping to Python package `{dependency_name}`, "
+                "but was not found in the lockfile"
+            )
+            return None
+
+        if "+" in locked_package.version:
+            self.printer.debug(
+                f"Pre-commit hook {pre_commit_config_repo.repo} has a mapping to Python package `{dependency_name}`, "
+                f"but is skipped because the locked version `{locked_package.version}` contaims a `+`, "
+                "which is a local version identifier."
+            )
+            return None
         if locked_package.name in self.plugin_config.ignore:
             self.printer.debug(f"Ignoring {locked_package.name} from configuration.")
             return None
@@ -85,7 +124,7 @@ class SyncPreCommitHooksVersion:
         self.printer.debug(
             f"Found mapping between pre-commit hook `{pre_commit_config_repo.repo}` and locked package `{locked_package.name}`."
         )
-        formatted_rev = mapping_db_repo_info["rev"].replace("${rev}", str(locked_package.version))
+        formatted_rev = dependency["rev"].replace("${rev}", str(locked_package.version))
         if formatted_rev != pre_commit_config_repo.rev:
             self.printer.debug(
                 f"Pre-commit hook {pre_commit_config_repo.repo} and locked package {locked_package.name} have different versions:\n"
@@ -99,52 +138,48 @@ class SyncPreCommitHooksVersion:
         )
         return None
 
-    def build_mapping(self) -> tuple[PackageRepoMapping, dict[str, str]]:
-        """Merge the default mapping with the user-provided mapping. Also build a reverse mapping by URL."""
-        mapping: PackageRepoMapping = {**DEPENDENCY_MAPPING, **self.plugin_config.dependency_mapping}
-        mapping_reverse_by_url = {repo["repo"]: lib_name for lib_name, repo in mapping.items()}
-        for canonical_name, aliases in REPOSITORY_ALIASES.items():
-            for alias in aliases:
-                mapping_reverse_by_url[alias] = mapping_reverse_by_url[canonical_name]
-        # XXX Allow override / extend of aliases
-        return mapping, mapping_reverse_by_url
+    def get_pre_commit_repo_new_hooks(self, hooks: Sequence[PreCommitHook]) -> Sequence[PreCommitHook]:
+        return [self.get_pre_commit_repo_new_hook(hook) for hook in hooks]
+
+    def get_pre_commit_repo_new_hook(self, hook: PreCommitHook) -> PreCommitHook:
+        return PreCommitHook(
+            hook.id, [self.get_pre_commit_repo_hook_new_dependency(dep) for dep in hook.additional_dependencies]
+        )
+
+    def get_pre_commit_repo_hook_new_dependency(self, dependency: str) -> str:
+        if "+" in dependency:
+            self.printer.debug(f"Additional dependency {dependency} is a local version. Ignoring.")
+            return dependency
+        try:
+            requirement = Requirement(dependency)
+        except InvalidRequirement:
+            self.printer.debug(f"Invalid additional dependency {dependency}. Ignoring.")
+            return dependency
+        normalized_name = canonicalize_name(requirement.name)
+        if not (locked_version := self.locked_packages.get(normalized_name)):
+            self.printer.debug(f"Additional dependency {dependency} not found in the lockfile. Ignoring.")
+            return dependency
+        return str(locked_version).replace(normalized_name, requirement.name)
 
     def analyze_repos(
         self,
         pre_commit_repos: set[PreCommitRepo],
-        mapping: PackageRepoMapping,
-        mapping_reverse_by_url: dict[str, str],
-    ) -> tuple[dict[PreCommitRepo, str], dict[PreCommitRepo, str]]:
-        to_fix: dict[PreCommitRepo, str] = {}
-        in_sync: dict[PreCommitRepo, str] = {}
+    ) -> tuple[dict[PreCommitRepo, PreCommitRepo], dict[PreCommitRepo, PreCommitRepo]]:
+        to_fix: dict[PreCommitRepo, PreCommitRepo] = {}
+        in_sync: dict[PreCommitRepo, PreCommitRepo] = {}
         for pre_commit_repo in pre_commit_repos:
-            if pre_commit_repo.repo not in mapping_reverse_by_url:
+            if pre_commit_repo.repo not in self.mapping_reverse_by_url:
                 self.printer.debug(f"Pre-commit hook {pre_commit_repo.repo} not found in the DB mapping")
                 continue
 
-            dependency = mapping[mapping_reverse_by_url[pre_commit_repo.repo]]
-            dependency_name = mapping_reverse_by_url[pre_commit_repo.repo]
-            dependency_locked = self.locked_packages.get(dependency_name)
-
-            if not dependency_locked:
-                self.printer.debug(
-                    f"Pre-commit hook {pre_commit_repo.repo} has a mapping to Python package `{dependency_name}`, "
-                    "but was not found in the lockfile"
-                )
-                continue
-
-            if "+" in dependency_locked.version:
-                self.printer.debug(
-                    f"Pre-commit hook {pre_commit_repo.repo} has a mapping to Python package `{dependency_name}`, "
-                    f"but is skipped because the locked version `{dependency_locked.version}` contaims a `+`, "
-                    "which is a local version identifier."
-                )
-                continue
-
-            new_ver = self.get_pre_commit_repo_new_version(pre_commit_repo, dependency, dependency_locked)
-            if new_ver:
-                to_fix[pre_commit_repo] = new_ver
+            new_repo = PreCommitRepo(
+                repo=pre_commit_repo.repo,
+                rev=self.get_pre_commit_repo_new_version(pre_commit_repo) or pre_commit_repo.rev,
+                hooks=self.get_pre_commit_repo_new_hooks(pre_commit_repo.hooks),
+            )
+            if new_repo != pre_commit_repo:
+                to_fix[pre_commit_repo] = new_repo
             else:
-                in_sync[pre_commit_repo] = dependency_locked.version
+                in_sync[pre_commit_repo] = pre_commit_repo
 
         return to_fix, in_sync

@@ -36,5 +36,5 @@ class Printer(ABC):
     def success(self, msg: str) -> None:
         raise NotImplementedError
 
-    def list_updated_packages(self, packages: dict[str, tuple[PreCommitRepo, str]]) -> None:
+    def list_updated_packages(self, packages: dict[str, tuple[PreCommitRepo, PreCommitRepo]]) -> None:
         raise NotImplementedError

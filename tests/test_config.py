@@ -1,6 +1,7 @@
 from unittest.mock import MagicMock, patch
 
 import pytest
+
 from sync_pre_commit_lock.config import SyncPreCommitLockConfig, from_toml, load_config, update_from_env
 from sync_pre_commit_lock.db import RepoInfo
 

@@ -15,11 +15,11 @@ PDM and Poetry plugin to sync your pre-commit versions with your lockfile and au
 
 ## Features
 
-- 🔁 Sync pre-commit versions with your lockfile
+- 🔁 Sync pre-commit versions (including `additional_dependencies`) with your lockfile
 - ⏩ Run every time you run the lockfile is updated, not as a pre-commit hook
 - 🔄 Install pre-commit hooks automatically, no need to run `pre-commit install` manually
 - 💫 Preserve your pre-commit config file formatting
-- 🍃 Lightweight, only depends on [strictyaml](https://pypi.org/project/strictyaml/)
+- 🍃 Lightweight, only depends on [strictyaml](https://pypi.org/project/strictyaml/) and [packaging](https://pypi.org/project/packaging/)
 
 ## Supported versions
 
@@ -163,13 +163,15 @@ Feel free to open an issue or a PR if you have any idea, or if you want to help!
 - [ ] Create a more verbose command
 - [ ] Add support for other lockfiles / project managers (pipenv, flit, hatch, etc.)
 - [ ] Expose a pre-commit hook to sync the lockfile
-- [ ] Support nested params for some repos? Like mypy types
+- [x] Support nested `additional_dependencies`, (ie. mypy types)
 - [ ] Support reading DB from a Python module?
 - [ ] Support reordering DB inputs (file/global config/python module/cli)?
 - [ ] Test using SSH/file dependencies?
 - [ ] Check ref existence before writing?
 - [ ] New feature to convert from pre-commit online to local?
 - [ ] Warning if pre-commit CI auto update is also set?
+- [ ] Support automatic repository URL update (from legacy aliased repositories)
+
 
 ## Inspiration
 
