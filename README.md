@@ -68,7 +68,7 @@ Here is the default configuration:
 ```toml
 [tool.sync-pre-commit-lock]
 # Run `pre-commit install` automatically if applicable
-automaticall-install-hooks = true
+automatically-install-hooks = true
 # Should we sync your pre-commit versions with your lockfile (when running lock, add, update, remove, etc.)?
 disable-sync-from-lock = false
 # Packages to ignore when syncing from lock
@@ -163,7 +163,7 @@ Feel free to open an issue or a PR if you have any idea, or if you want to help!
 - [ ] Create a more verbose command
 - [ ] Add support for other lockfiles / project managers (pipenv, flit, hatch, etc.)
 - [ ] Expose a pre-commit hook to sync the lockfile
-- [x] Support nested `additional_dependencies`, (ie. mypy types)
+- [x] Support nested `additional_dependencies`, (i.e. mypy types)
 - [ ] Support reading DB from a Python module?
 - [ ] Support reordering DB inputs (file/global config/python module/cli)?
 - [ ] Test using SSH/file dependencies?
