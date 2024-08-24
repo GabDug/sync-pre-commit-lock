@@ -51,10 +51,10 @@ plugins = [
 
 ### For Poetry
 
-Install [like any other Poetry plugin](https://python-poetry.org/docs/master/plugins/#using-plugins), e.g.:
+Install [like any other Poetry plugin](https://python-poetry.org/docs/plugins/#using-plugins), e.g.:
 
 ```bash
-poetry self plugin add "sync-pre-commit-lock[poetry]"
+poetry self add "sync-pre-commit-lock[poetry]"
 ```
 
 > Only Poetry 1.6.0+ is supported.
