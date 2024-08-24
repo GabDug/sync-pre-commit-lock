@@ -462,3 +462,51 @@ def test_analyze_repos_local_but_additional_dependencies() -> None:
     assert to_fix == {
         pre_commit_repo: PreCommitRepo("https://repo_url", "1.2.3", [PreCommitHook("hook", ["lib-name==2.0.0"])])
     }
+
+
+MOCK_DEP_MAPPING = {"dep": {"repo": "https://some.place", "rev": "${dev}"}}
+MOCK_REPO_ALIASES = {"https://some.place": ("https://some.old.place",)}
+
+
+@patch("sync_pre_commit_lock.actions.sync_hooks.DEPENDENCY_MAPPING", MOCK_DEP_MAPPING)
+@patch("sync_pre_commit_lock.actions.sync_hooks.REPOSITORY_ALIASES", MOCK_REPO_ALIASES)
+def test_analyze_repos_renamed() -> None:
+    printer = MagicMock(spec=Printer)
+    pre_commit_config_file_path = MagicMock(spec=Path)
+    locked_packages: dict[str, GenericLockedPackage] = {"ruff": GenericLockedPackage("dep", "1.2.3")}
+    plugin_config = SyncPreCommitLockConfig()
+
+    syncer = SyncPreCommitHooksVersion(
+        printer=printer,
+        pre_commit_config_file_path=pre_commit_config_file_path,
+        locked_packages=locked_packages,
+        plugin_config=plugin_config,
+    )
+    pre_commit_repo = PreCommitRepo("https://some.old.place", "1.2.3")
+    pre_commit_repos = {pre_commit_repo}
+
+    to_fix, _ = syncer.analyze_repos(pre_commit_repos)
+
+    assert to_fix == {pre_commit_repo: PreCommitRepo("https://some.place", "1.2.3")}
+
+
+@patch("sync_pre_commit_lock.actions.sync_hooks.DEPENDENCY_MAPPING", MOCK_DEP_MAPPING)
+@patch("sync_pre_commit_lock.actions.sync_hooks.REPOSITORY_ALIASES", MOCK_REPO_ALIASES)
+def test_analyze_repos_already_last_url() -> None:
+    printer = MagicMock(spec=Printer)
+    pre_commit_config_file_path = MagicMock(spec=Path)
+    locked_packages: dict[str, GenericLockedPackage] = {"ruff": GenericLockedPackage("dep", "1.2.3")}
+    plugin_config = SyncPreCommitLockConfig()
+
+    syncer = SyncPreCommitHooksVersion(
+        printer=printer,
+        pre_commit_config_file_path=pre_commit_config_file_path,
+        locked_packages=locked_packages,
+        plugin_config=plugin_config,
+    )
+    pre_commit_repo = PreCommitRepo("https://some.place", "1.2.3")
+    pre_commit_repos = {pre_commit_repo}
+
+    to_fix, _ = syncer.analyze_repos(pre_commit_repos)
+
+    assert to_fix == {}

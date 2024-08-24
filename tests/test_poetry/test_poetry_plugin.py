@@ -220,6 +220,36 @@ def test_poetry_printer_list_success_with_multiple_hooks_and_additional_dependen
     assert "[sync-pre-commit-lock]      └ other                  >=0.42 -> 3.4.5" in out
 
 
+def test_poetry_printer_list_success_renamed_repository(capsys: pytest.CaptureFixture[str]) -> None:
+    from cleo.io.inputs.input import Input
+    from cleo.io.io import IO
+    from cleo.io.outputs.output import Output
+
+    from sync_pre_commit_lock.poetry_plugin import PoetryPrinter
+
+    output = Output()
+
+    def _write(message: str, new_line: bool = False):
+        print(message)  # noqa: T201
+
+    output._write = _write
+    printer = PoetryPrinter(IO(input=Input(), output=output, error_output=output))
+
+    printer.list_updated_packages(
+        {
+            "package": (
+                PreCommitRepo("https://old.repo.local/test", "rev1", [PreCommitHook("hook")]),
+                PreCommitRepo("https://new.repo.local/test", "rev2", [PreCommitHook("hook")]),
+            ),
+        }
+    )
+    captured = capsys.readouterr()
+    # Remove all <..> tags, as we don't have the real parser
+    out = re.sub(r"<[^>]*>", "", captured.out)
+
+    assert "[sync-pre-commit-lock]  • https://{old -> new}.repo.local/test   rev1 -> rev2" in out
+
+
 def test_direct_command_invocation():
     with pytest.raises(RuntimeError, match="self.application is None"):
         SyncPreCommitPoetryCommand().handle()

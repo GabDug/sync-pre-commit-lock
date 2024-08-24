@@ -17,6 +17,7 @@ from sync_pre_commit_lock import (
 from sync_pre_commit_lock.actions.install_hooks import SetupPreCommitHooks
 from sync_pre_commit_lock.actions.sync_hooks import GenericLockedPackage, SyncPreCommitHooksVersion
 from sync_pre_commit_lock.config import SyncPreCommitLockConfig, load_config
+from sync_pre_commit_lock.utils import url_diff
 
 if TYPE_CHECKING:
     import argparse
@@ -59,8 +60,9 @@ class PDMPrinter(Printer):
     def success(self, msg: str) -> None:
         self.ui.echo("[success]" + self.prefix_lines(msg) + "[/success]", verbosity=Verbosity.NORMAL)
 
-    def _format_repo_url(self, repo_url: str, package_name: str) -> str:
-        return repo_url.replace(package_name, f"[cyan][bold]{package_name}[/bold][/cyan]")
+    def _format_repo_url(self, old_repo_url: str, new_repo_url: str, package_name: str) -> str:
+        url = url_diff(old_repo_url, new_repo_url, "[cyan]{[/][red]", "[/red][cyan] -> [/][green]", "[/][cyan]}[/]")
+        return url.replace(package_name, f"[cyan][bold]{package_name}[/bold][/cyan]")
 
     def list_updated_packages(self, packages: dict[str, tuple[PreCommitRepo, PreCommitRepo]]) -> None:
         """
@@ -75,7 +77,7 @@ class PDMPrinter(Printer):
         new_version = new.rev != old.rev
         repo = (
             f"[info]{self.plugin_prefix}[/info] {self.success_list_token}",
-            f"[info]{self._format_repo_url(old.repo, package)}[/info]",
+            f"[info]{self._format_repo_url(old.repo, new.repo, package)}[/info]",
             " ",
             f"[error]{old.rev}[/error]" if new_version else "",
             "[info]->[/info]" if new_version else "",
