@@ -42,7 +42,7 @@ def normalize_git_url(url: str) -> str:
 
 
 def url_diff(old: str, new: str, diff_open: str = "{", diff_separator: str = " -> ", diff_close: str = "}") -> str:
-    """Represent a change of URL highliting only the changed part"""
+    """Represent a change of URL highlighting only the changed part"""
     if old == new:
         return new
     prefix = commonprefix((old, new))
