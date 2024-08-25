@@ -64,7 +64,7 @@ class SyncPreCommitHooksVersion:
             return
         if len(to_fix) == 0:
             packages_str = ", ".join(
-                f"{self.mapping_reverse_by_url[repo.repo]} ({rev})" for repo, rev in in_sync.items()
+                f"{self.mapping_reverse_by_url[pre_commit.repo]} ({pre_commit.rev})" for pre_commit in in_sync.values()
             )
             self.printer.info(f"All pre-commit hooks are already up to date with the lockfile: {packages_str}")
             return
