@@ -32,7 +32,7 @@ jobs:
         uses: hynek/build-and-inspect-python-package@v2
         with:
           upload-name-suffix: -${{ matrix.python-version }}-${{ matrix.os }}
-          attest-build-provenance-github: 'true'
+          attest-build-provenance-github: ${{ github.event_name != 'pull_request' && !github.event.pull_request.head.repo.fork }}
     outputs:
         # Outputs the supported Python versions as a JSON array, from the project classifiers
         python-versions: ${{ steps.baipp.outputs.supported_python_classifiers_json_array }}
