@@ -24,7 +24,6 @@ if TYPE_CHECKING:
     from collections.abc import Sequence
     from pathlib import Path
 
-    from pdm.cli.hooks import HookManager
     from pdm.core import Core
     from pdm.models.candidates import Candidate
     from pdm.models.repositories.lock import LockedRepository
@@ -137,9 +136,7 @@ class PDMSyncPreCommitHooksVersion(SyncPreCommitHooksVersion):
 
 
 @post_install.connect
-def on_pdm_install_setup_pre_commit(
-    project: Project, *, hooks: HookManager, candidates: list[Candidate], dry_run: bool, **_: Any
-) -> None:
+def on_pdm_install_setup_pre_commit(project: Project, *, dry_run: bool, **_: Any) -> None:
     printer = PDMPrinter(project.core.ui)
     project_root: Path = project.root
     plugin_config: SyncPreCommitLockConfig = load_config(project_root / project.PYPROJECT_FILENAME)
@@ -171,7 +168,7 @@ def select_candidate(candidate: Union[Candidate, list[Candidate]]) -> Candidate 
 
 @post_lock.connect
 def on_pdm_lock_check_pre_commit(
-    project: Project, *, resolution: Resolution, dry_run: bool, with_prefix: bool = True, **kwargs: Any
+    project: Project, *, resolution: Resolution, dry_run: bool, with_prefix: bool = True, **_: Any
 ) -> None:
     project_root: Path = project.root
     plugin_config: SyncPreCommitLockConfig = load_config(project_root / project.PYPROJECT_FILENAME)

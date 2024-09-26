@@ -104,6 +104,7 @@ max_supported_python = "3.13"
 minversion = "7.0"
 testpaths = [ "tests" ]
 norecursedirs = "*.egg .eggs dist build docs .tox .git __pycache__ node_modules .venv __pypackages__"
+addopts = "-ra --log-disable unearth.evaluator --log-disable unearth.collector --log-disable unearth.auth --log-disable pdm.termui"
 
 [tool.coverage.paths]
 source = [

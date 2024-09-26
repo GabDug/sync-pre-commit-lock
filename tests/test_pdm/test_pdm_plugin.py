@@ -7,9 +7,7 @@ import pytest
 
 pdm_module = pytest.importorskip("pdm")
 # ruff: noqa: E402
-from pdm.cli.hooks import HookManager
 from pdm.core import Core
-from pdm.models.candidates import Candidate
 from pdm.project import Project
 from pdm.termui import UI
 
@@ -32,8 +30,6 @@ def project() -> Project:
     return x
 
 
-hooks_mock = mock.create_autospec(HookManager, instance=True)
-candidates_mock = [mock.create_autospec(Candidate, instance=True)]
 config_mock = mock.create_autospec(SyncPreCommitLockConfig, instance=True)
 printer_mock = mock.create_autospec(PDMPrinter, instance=True)
 action_mock = mock.create_autospec(PDMSetupPreCommitHooks, instance=True)
@@ -47,7 +43,7 @@ def test_on_pdm_install_setup_pre_commit_auto_install_disabled(project: mock.Mag
     ):
         from sync_pre_commit_lock.pdm_plugin import on_pdm_install_setup_pre_commit
 
-        on_pdm_install_setup_pre_commit(project, hooks=hooks_mock, candidates=candidates_mock, dry_run=False)
+        on_pdm_install_setup_pre_commit(project, dry_run=False)
     printer_mock.debug.assert_any_call("Automatically installing pre-commit hooks is disabled. Skipping.")
 
 
@@ -61,7 +57,7 @@ def test_on_pdm_install_setup_pre_commit_no_config_file(tmp_path: Path, project:
     ):
         from sync_pre_commit_lock.pdm_plugin import on_pdm_install_setup_pre_commit
 
-        on_pdm_install_setup_pre_commit(project, hooks=hooks_mock, candidates=candidates_mock, dry_run=False)
+        on_pdm_install_setup_pre_commit(project, dry_run=False)
     printer_mock.info.assert_called_once_with("No pre-commit config file found, skipping pre-commit hook check")
 
 
@@ -77,7 +73,7 @@ def test_on_pdm_install_setup_pre_commit_success(project: Project) -> None:
     ):
         from sync_pre_commit_lock.pdm_plugin import on_pdm_install_setup_pre_commit
 
-        on_pdm_install_setup_pre_commit(project, hooks=hooks_mock, candidates=candidates_mock, dry_run=False)
+        on_pdm_install_setup_pre_commit(project, dry_run=False)
 
     action_mock.execute.assert_called_once()
 
