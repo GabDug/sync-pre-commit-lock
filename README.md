@@ -127,6 +127,7 @@ Here is the list of default packages supported by this plugin, from [`db.py`](ht
 - [check-jsonschema](https://github.com/python-jsonschema/check-jsonschema)
 - [codespell](https://github.com/codespell-project/codespell)
 - [commitizen](https://github.com/commitizen-tools/commitizen)
+- [djade](https://github.com/adamchainz/djade-pre-commit)
 - [djhtml](https://github.com/rtts/djhtml)
 - [docformatter](https://github.com/PyCQA/docformatter)
 - [flake8](https://github.com/pycqa/flake8)
