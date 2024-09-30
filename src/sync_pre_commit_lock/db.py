@@ -39,6 +39,10 @@ DEPENDENCY_MAPPING: PackageRepoMapping = {
         "repo": "https://github.com/commitizen-tools/commitizen",
         "rev": "v${rev}",
     },
+    "djade": {
+        "repo": "https://github.com/adamchainz/djade-pre-commit",
+        "rev": "${rev}",
+    },
     "djhtml": {
         "repo": "https://github.com/rtts/djhtml",
         "rev": "${rev}",
