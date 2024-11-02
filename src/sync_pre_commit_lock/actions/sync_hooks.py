@@ -22,9 +22,6 @@ class GenericLockedPackage(NamedTuple):
     version: str
     # Add original data here?
 
-    def __str__(self) -> str:
-        return f"{self.name}=={self.version}"
-
 
 class SyncPreCommitHooksVersion:
     def __init__(
