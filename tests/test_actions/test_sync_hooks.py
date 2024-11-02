@@ -415,6 +415,33 @@ def test_analyze_repos_additional_dependencies() -> None:
     }
 
 
+def test_analyze_repos_additional_dependencies_preserve_extras() -> None:
+    printer = MagicMock(spec=Printer)
+    pre_commit_config_file_path = MagicMock(spec=Path)
+    locked_packages: dict[str, GenericLockedPackage] = {"lib-name": GenericLockedPackage("lib-name", "2.0.0")}
+    plugin_config = SyncPreCommitLockConfig()
+
+    syncer = SyncPreCommitHooksVersion(
+        printer=printer,
+        pre_commit_config_file_path=pre_commit_config_file_path,
+        locked_packages=locked_packages,
+        plugin_config=plugin_config,
+    )
+    pre_commit_repo = PreCommitRepo(
+        "https://repo_url", "1.2.3", [PreCommitHook("hook", ["lib-name[with,extras]==1.2.2"])]
+    )
+    pre_commit_repos = {pre_commit_repo}
+    syncer.mapping = {"lib-name": {"repo": "https://repo_url", "rev": "${rev}"}}
+
+    to_fix, _ = syncer.analyze_repos(pre_commit_repos)
+
+    assert to_fix == {
+        pre_commit_repo: PreCommitRepo(
+            "https://repo_url", "2.0.0", [PreCommitHook("hook", ["lib-name[extras,with]==2.0.0"])]
+        )
+    }
+
+
 def test_analyze_repos_not_in_lock_but_additional_dependencies() -> None:
     printer = MagicMock(spec=Printer)
     pre_commit_config_file_path = MagicMock(spec=Path)
