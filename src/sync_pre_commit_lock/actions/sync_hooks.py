@@ -4,6 +4,7 @@ from functools import cached_property
 from typing import TYPE_CHECKING, NamedTuple, Sequence
 
 from packaging.requirements import InvalidRequirement, Requirement
+from packaging.specifiers import SpecifierSet
 from packaging.utils import canonicalize_name
 
 from sync_pre_commit_lock.db import DEPENDENCY_MAPPING, REPOSITORY_ALIASES, PackageRepoMapping
@@ -20,9 +21,6 @@ class GenericLockedPackage(NamedTuple):
     name: str
     version: str
     # Add original data here?
-
-    def __str__(self) -> str:
-        return f"{self.name}=={self.version}"
 
 
 class SyncPreCommitHooksVersion:
@@ -162,7 +160,8 @@ class SyncPreCommitHooksVersion:
         if not (locked_version := self.locked_packages.get(normalized_name)):
             self.printer.debug(f"Additional dependency {dependency} not found in the lockfile. Ignoring.")
             return dependency
-        return str(locked_version).replace(normalized_name, requirement.name)
+        requirement.specifier = SpecifierSet(f"=={locked_version.version}")
+        return str(requirement)
 
     def analyze_repos(
         self,
