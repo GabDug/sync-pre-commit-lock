@@ -115,6 +115,25 @@ poetry sync-pre-commit
 
 Both commands support `--dry-run` and verbosity options.
 
+### PDM Github Action support
+
+If you use [pdm-project/update-deps-actions](https://github.com/pdm-project/update-deps-action) Github Action, you can get automatically update `your .pre-commit-config.yaml` file by adding the plugin in your `pyproject.toml` and setting a flag in your workflow:
+
+```yaml
+# In your workflow
+      - name: Update dependencies
+        uses: pdm-project/update-deps-action@main
+        with:
+          # Whether to install PDM plugins before update (defaults to "false")
+          install-plugins: "true"
+```
+
+```toml
+# In your pyproject.toml
+[tool.pdm]
+plugins = ["sync-pre-commit-lock"]
+```
+
 ## Supported packages for pre-commits
 
 Here is the list of default packages supported by this plugin, from [`db.py`](https://github.com/GabDug/sync-pre-commit-lock/blob/main/src/sync_pre_commit_lock/db.py). You can add more packages using the `dependency-mapping` configuration.

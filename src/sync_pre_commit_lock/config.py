@@ -34,17 +34,7 @@ def from_toml(data: dict[str, Any]) -> SyncPreCommitLockConfig:
 
     fields = {f.metadata.get("toml", f.name): f for f in SyncPreCommitLockConfig.__dataclass_fields__.values()}
     # XXX We should warn about unknown fields
-    return SyncPreCommitLockConfig(
-        **{
-            fields[name].name: (
-                data[name]
-                if isinstance(fields[name].type, type) and issubclass(fields[name].type, SyncPreCommitLockConfig)
-                else data[name]
-            )
-            for name in data
-            if name in fields
-        }
-    )
+    return SyncPreCommitLockConfig(**{fields[name].name: data[name] for name in data if name in fields})
 
 
 def update_from_env(config: SyncPreCommitLockConfig) -> SyncPreCommitLockConfig:
