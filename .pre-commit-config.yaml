@@ -46,7 +46,7 @@ repos:
         verbose: true
         files: ^db\.py|README\.md$
 
-  - rev: v0.7.3
+  - rev: v0.8.0
     repo: https://github.com/astral-sh/ruff-pre-commit
     hooks:
       - id: ruff
