@@ -36,7 +36,7 @@ if TYPE_CHECKING:
 
 
 class PoetryPrinter(Printer):
-    success_list_token: str = "<fg=green;options=bold>•</>"
+    success_list_token: str = "<fg=green;options=bold>•</>"  # noqa: S105
 
     def __init__(self, io: IO, with_prefix: bool = True) -> None:
         self.io = io
