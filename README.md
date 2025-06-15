@@ -24,7 +24,7 @@ PDM and Poetry plugin to sync your pre-commit versions with your lockfile and au
 ## Supported versions
 
 - Python 3.9+ to 3.13+
-- PDM 2.7.4 to 2.24+
+- PDM 2.7.4 to 2.25+
   - Python 3.12.7+ requires PDM 2.20.1+
 - Poetry 1.6 to 2.1+
 
@@ -96,7 +96,7 @@ dependency-mapping = {"package-name"= {"repo"= "https://github.com/example/packa
 Some settings are overridable by environment variables with the following `SYNC_PRE_COMMIT_LOCK_*` prefixed environment variables:
 
 | `toml` setting                | environment                            | format                            |
-| ------------------------------|----------------------------------------|-----------------------------------|
+| ----------------------------- | -------------------------------------- | --------------------------------- |
 | `automatically-install-hooks` | `SYNC_PRE_COMMIT_LOCK_INSTALL`         | `bool` as string (`true`, `1`...) |
 | `disable-sync-from-lock`      | `SYNC_PRE_COMMIT_LOCK_DISABLED`        | `bool` as string (`true`, `1`...) |
 | `ignore`                      | `SYNC_PRE_COMMIT_LOCK_IGNORE`          | comma-separated list              |
@@ -184,7 +184,7 @@ Feel free to open an issue or a PR if you have any idea, or if you want to help!
 
 ### Features or fixes
 
-- [X] Support hooks URL aliases for the same Python package
+- [x] Support hooks URL aliases for the same Python package
   - [ ] Support user configuration of aliases
 - [ ] Support `pdm config` and clear configuration precedence
 - [ ] Create a more verbose command
@@ -198,7 +198,6 @@ Feel free to open an issue or a PR if you have any idea, or if you want to help!
 - [ ] New feature to convert from pre-commit online to local?
 - [ ] Warning if pre-commit CI auto update is also set?
 - [x] Support automatic repository URL update (from legacy aliased repositories)
-
 
 ## Inspiration
 
