@@ -54,6 +54,6 @@ repos:
       - id: ruff-format
 
   - repo: https://github.com/pdm-project/pdm
-    rev: 2.24.0
+    rev: 2.25.1
     hooks:
       - id: pdm-lock-check
