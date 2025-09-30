@@ -141,6 +141,23 @@ If you use [pdm-project/update-deps-actions](https://github.com/pdm-project/upda
 plugins = ["sync-pre-commit-lock"]
 ```
 
+### Pre-commit hook support
+
+You can also add a pre-commit hook to sync your lock file before committing, by adding the following to your `.pre-commit-config.yaml` file:
+
+```yaml
+repos:
+  - repo: https://github.com/GabDug/sync-pre-commit-lock
+    rev: v0.7.3  # Use the latest tag
+    hooks: # Choose the one matching your package manager
+      - id: sync-pre-commit-pdm
+      - id: sync-pre-commit-poetry
+```
+
+
+If your lock file changed and you pre-commit config is not up-to-date with it, it will fail and sync it.
+
+
 ## Supported packages for pre-commits
 
 Here is the list of default packages supported by this plugin, from [`db.py`](https://github.com/GabDug/sync-pre-commit-lock/blob/main/src/sync_pre_commit_lock/db.py). You can add more packages using the `dependency-mapping` configuration.
@@ -167,6 +184,7 @@ Here is the list of default packages supported by this plugin, from [`db.py`](ht
 - [pyupgrade](https://github.com/asottile/pyupgrade)
 - [rtscheck](https://github.com/rstcheck/rstcheck)
 - [ruff](https://github.com/astral-sh/ruff-pre-commit)
+- [sync-pre-commit-lock](https://github.com/GabDug/sync-pre-commit-lock)
 - [yamllint](https://github.com/adrienverge/yamllint)
 <!-- END-GENERATED-PACKAGES-LIST -->
 
@@ -189,7 +207,7 @@ Feel free to open an issue or a PR if you have any idea, or if you want to help!
 - [ ] Support `pdm config` and clear configuration precedence
 - [ ] Create a more verbose command
 - [ ] Add support for other lockfiles / project managers (pipenv, flit, hatch, etc.)
-- [ ] Expose a pre-commit hook to sync the lockfile
+- [x] Expose a pre-commit hook to sync the lockfile
 - [x] Support nested `additional_dependencies`, (i.e. mypy types)
 - [ ] Support reading DB from a Python module?
 - [ ] Support reordering DB inputs (file/global config/python module/cli)?

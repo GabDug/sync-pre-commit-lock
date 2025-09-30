@@ -1,0 +1,18 @@
+- id: sync-pre-commit-pdm
+  name: Sync pre-commit with pdm lock
+  description: Ensure pre-commit hooks versions are in sync with pdm.lock
+  entry: pdm sync-pre-commit
+  language: python
+  files: ^(pdm\.lock|pylocki\.toml)$
+  args: []
+  pass_filenames: false
+  additional_dependencies: [pdm]
+- id: sync-pre-commit-poetry
+  name: Sync pre-commit with Poetry lock
+  description: Ensure pre-commit hooks versions are in sync with poetry.lock
+  entry: poetry sync-pre-commit
+  language: python
+  files: ^poetry\.lock$
+  args: []
+  pass_filenames: false
+  additional_dependencies: [poetry]
