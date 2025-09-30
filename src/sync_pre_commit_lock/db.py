@@ -95,6 +95,10 @@ DEPENDENCY_MAPPING: PackageRepoMapping = {
         "repo": "https://github.com/astral-sh/ruff-pre-commit",
         "rev": "v${rev}",
     },
+    "sync-pre-commit-lock": {
+        "repo": "https://github.com/GabDug/sync-pre-commit-lock",
+        "rev": "v${rev}",
+    },
     "yamllint": {
         "repo": "https://github.com/adrienverge/yamllint",
         "rev": "v${rev}",
