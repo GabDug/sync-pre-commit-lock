@@ -5,17 +5,10 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable, TypedDict
 
-try:
-    # 3.11+
-    import tomllib as toml  # type: ignore[import,unused-ignore]
-except ImportError:
-    import tomli as toml  # type: ignore[no-redef,unused-ignore]
-
+from ._compat import toml
 
 if TYPE_CHECKING:
     from sync_pre_commit_lock.db import PackageRepoMapping
-
-    pass
 
 ENV_PREFIX = "SYNC_PRE_COMMIT_LOCK"
 

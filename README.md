@@ -27,12 +27,13 @@ PDM and Poetry plugin to sync your pre-commit versions with your lockfile and au
 - PDM 2.7.4 to 2.25+
   - Python 3.12.7+ requires PDM 2.20.1+
 - Poetry 1.6 to 2.1+
+- uv (lock version 1)
 
 > ℹ️ While we only test these versions, it should work with more recent versions.
 >
 > ⚠️ Only the latest patch version for each minor version is tested.
 >
-> 👉 We recommend using a recent version of Python, and a recent version of PDM/Poetry.
+> 👉 We recommend using a recent version of Python, and a recent version of PDM/Poetry/uv.
 
 ## Installation
 
@@ -65,6 +66,11 @@ poetry self add "sync-pre-commit-lock[poetry]"
 ```
 
 > Only Poetry 1.6.0+ is supported.
+
+
+### For uv
+
+`uv` does not yet support plugins, but you can still use the CLI command `sync-pre-commit-uv` or the `pre-commit` hook.
 
 ## Configuration
 
@@ -120,7 +126,13 @@ or
 poetry sync-pre-commit
 ```
 
-Both commands support `--dry-run` and verbosity options.
+or
+
+```bash
+sync-pre-commit-uv
+```
+
+Those commands support `--dry-run` and verbosity options.
 
 ### PDM Github Action support
 
@@ -152,6 +164,7 @@ repos:
     hooks: # Choose the one matching your package manager
       - id: sync-pre-commit-pdm
       - id: sync-pre-commit-poetry
+      - id: sync-pre-commit-uv
 ```
 
 

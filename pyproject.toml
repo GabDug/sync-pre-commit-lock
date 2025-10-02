@@ -45,6 +45,8 @@ optional-dependencies.poetry = [
 urls."Bug Tracker" = "https://github.com/GabDug/sync-pre-commit-lock/issues"
 urls."Changelog" = "https://github.com/GabDug/sync-pre-commit-lock/releases"
 urls."Homepage" = "https://github.com/GabDug/sync-pre-commit-lock"
+scripts.sync-pre-commit-uv = "sync_pre_commit_lock.uv:sync_pre_commit"
+
 entry-points.pdm.pdm-sync-pre-commit-lock = "sync_pre_commit_lock.pdm_plugin:register_pdm_plugin"
 entry-points."poetry.application.plugin".poetry-sync-pre-commit-lock = "sync_pre_commit_lock.poetry_plugin:SyncPreCommitLockPlugin"
 
