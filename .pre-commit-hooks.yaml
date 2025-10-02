@@ -16,3 +16,11 @@
   args: []
   pass_filenames: false
   additional_dependencies: [poetry]
+- id: sync-pre-commit-uv
+  name: Sync pre-commit with uv lock
+  description: Ensure pre-commit hooks versions are in sync with uv.lock
+  entry: sync-pre-commit-uv
+  language: python
+  files: ^uv\.lock$
+  args: []
+  pass_filenames: false
