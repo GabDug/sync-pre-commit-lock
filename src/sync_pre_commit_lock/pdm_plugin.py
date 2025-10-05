@@ -91,7 +91,7 @@ class PDMPrinter(Printer):
         return [repo, *hooks] if hooks else [repo]
 
     def _format_hook(self, old: PreCommitHook, new: PreCommitHook, last: bool) -> Sequence[Sequence[str]]:
-        if not (nb_deps := len(old.additional_dependencies)):
+        if not len(old.additional_dependencies):
             return []
         hook = (
             f"[info]{self.plugin_prefix}[/info]",
@@ -100,9 +100,14 @@ class PDMPrinter(Printer):
             "",
             "",
         )
+        pairs = [
+            (old_dep, new_dep)
+            for old_dep, new_dep in zip(old.additional_dependencies, new.additional_dependencies)
+            if old_dep != new_dep
+        ]
         dependencies = [
-            self._format_additional_dependency(old_dep, new_dep, " " if last else "│", idx + 1 == nb_deps)
-            for idx, (old_dep, new_dep) in enumerate(zip(old.additional_dependencies, new.additional_dependencies))
+            self._format_additional_dependency(old_dep, new_dep, " " if last else "│", idx + 1 == len(pairs))
+            for idx, (old_dep, new_dep) in enumerate(pairs)
         ]
         return (hook, *dependencies)
 
