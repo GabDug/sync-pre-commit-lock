@@ -9,6 +9,7 @@ from cleo.events.console_terminate_event import ConsoleTerminateEvent
 from cleo.exceptions import CleoValueError
 from cleo.helpers import option
 from cleo.io.outputs.output import Verbosity
+from cleo.ui.table_style import TableStyle
 from packaging.requirements import Requirement
 from poetry.__version__ import __version__ as poetry_version
 from poetry.console.application import Application
@@ -33,6 +34,16 @@ if TYPE_CHECKING:
     from cleo.io.io import IO
 
     from sync_pre_commit_lock.pre_commit_config import PreCommitHook, PreCommitRepo
+
+
+very_compact_style = (
+    TableStyle()
+    .set_horizontal_border_chars("")
+    .set_vertical_border_chars("", " ")
+    .set_default_crossing_char("")
+    .set_cell_row_content_format("{}")
+)
+"""A compact style without outside borders"""
 
 
 class PoetryPrinter(Printer):
@@ -60,7 +71,7 @@ class PoetryPrinter(Printer):
     def list_updated_packages(self, packages: dict[str, tuple[PreCommitRepo, PreCommitRepo]]) -> None:
         from cleo.ui.table import Table
 
-        table = Table(self.io, style="compact")
+        table = Table(self.io, style=very_compact_style)  # type: ignore[arg-type]
 
         table.set_rows(
             [list(row) for package, (old, new) in packages.items() for row in self._format_repo(package, old, new)]
@@ -91,7 +102,7 @@ class PoetryPrinter(Printer):
         return url.replace(package_name, f"<c1>{package_name}</>")
 
     def _format_hook(self, old: PreCommitHook, new: PreCommitHook, last: bool) -> Sequence[Sequence[str]]:
-        if not (nb_deps := len(old.additional_dependencies)):
+        if not len(old.additional_dependencies):
             return []
         hook = (
             f"<info>{self.plugin_prefix}</>",
@@ -100,9 +111,14 @@ class PoetryPrinter(Printer):
             "",
             "",
         )
+        pairs = [
+            (old_dep, new_dep)
+            for old_dep, new_dep in zip(old.additional_dependencies, new.additional_dependencies)
+            if old_dep != new_dep
+        ]
         dependencies = [
-            self._format_additional_dependency(old_dep, new_dep, " " if last else "│", idx + 1 == nb_deps)
-            for idx, (old_dep, new_dep) in enumerate(zip(old.additional_dependencies, new.additional_dependencies))
+            self._format_additional_dependency(old_dep, new_dep, " " if last else "│", idx + 1 == len(pairs))
+            for idx, (old_dep, new_dep) in enumerate(pairs)
         ]
         return (hook, *dependencies)
 

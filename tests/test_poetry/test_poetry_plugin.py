@@ -1,4 +1,5 @@
 import re
+from textwrap import dedent
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -107,6 +108,18 @@ def test_handle_post_command_application_none() -> None:
         pytest.fail("RuntimeError not raised")
 
 
+def assert_output(out: str, expected: str):
+    __tracebackhide__ = True
+
+    # Remove all <..> tags, as we don't have the real parser
+    out = re.sub(r"<[^>]*>", "", out)
+
+    # Invisible whitespace enfinf lines (table side effect)
+    out = "\n".join(line.rstrip() for line in out.splitlines())
+
+    assert out.strip() == dedent(expected).strip()
+
+
 def test_poetry_printer_list_success(capsys: pytest.CaptureFixture[str]) -> None:
     from cleo.io.inputs.input import Input
     from cleo.io.io import IO
@@ -131,10 +144,8 @@ def test_poetry_printer_list_success(capsys: pytest.CaptureFixture[str]) -> None
         }
     )
     captured = capsys.readouterr()
-    # Remove all <..> tags, as we don't have the real parser
-    out = re.sub(r"<[^>]*>", "", captured.out)
 
-    assert "[sync-pre-commit-lock]  • https://repo1.local/test   rev1 -> rev2" in out
+    assert_output(captured.out, "[sync-pre-commit-lock]  • https://repo1.local/test   rev1 -> rev2")
 
 
 def test_poetry_printer_list_success_additional_dependency(capsys: pytest.CaptureFixture[str]) -> None:
@@ -161,12 +172,13 @@ def test_poetry_printer_list_success_additional_dependency(capsys: pytest.Captur
         }
     )
     captured = capsys.readouterr()
-    # Remove all <..> tags, as we don't have the real parser
-    out = re.sub(r"<[^>]*>", "", captured.out)
 
-    assert "[sync-pre-commit-lock]  • https://repo1.local/test" in out
-    assert "[sync-pre-commit-lock]    └ hook" in out
-    assert "[sync-pre-commit-lock]      └ dep                    * -> 0.1.2" in out
+    expected = """
+    [sync-pre-commit-lock]  • https://repo1.local/test
+    [sync-pre-commit-lock]    └ hook
+    [sync-pre-commit-lock]      └ dep                    * -> 0.1.2
+    """
+    assert_output(captured.out, expected)
 
 
 def test_poetry_printer_list_success_with_multiple_hooks_and_additional_dependency(
@@ -209,15 +221,16 @@ def test_poetry_printer_list_success_with_multiple_hooks_and_additional_dependen
         }
     )
     captured = capsys.readouterr()
-    # Remove all <..> tags, as we don't have the real parser
-    out = re.sub(r"<[^>]*>", "", captured.out)
 
-    assert "[sync-pre-commit-lock]  • https://repo1.local/test   rev1   -> rev2" in out
-    assert "[sync-pre-commit-lock]    ├ 1st-hook" in out
-    assert "[sync-pre-commit-lock]    │ └ other                  0.42   -> 3.4.5" in out
-    assert "[sync-pre-commit-lock]    └ 2nd-hook" in out
-    assert "[sync-pre-commit-lock]      ├ dep                    *      -> 0.1.2" in out
-    assert "[sync-pre-commit-lock]      └ other                  >=0.42 -> 3.4.5" in out
+    expected = """
+    [sync-pre-commit-lock]  • https://repo1.local/test   rev1   -> rev2
+    [sync-pre-commit-lock]    ├ 1st-hook
+    [sync-pre-commit-lock]    │ └ other                  0.42   -> 3.4.5
+    [sync-pre-commit-lock]    └ 2nd-hook
+    [sync-pre-commit-lock]      ├ dep                    *      -> 0.1.2
+    [sync-pre-commit-lock]      └ other                  >=0.42 -> 3.4.5
+    """
+    assert_output(captured.out, expected)
 
 
 def test_poetry_printer_list_success_renamed_repository(capsys: pytest.CaptureFixture[str]) -> None:
@@ -244,10 +257,8 @@ def test_poetry_printer_list_success_renamed_repository(capsys: pytest.CaptureFi
         }
     )
     captured = capsys.readouterr()
-    # Remove all <..> tags, as we don't have the real parser
-    out = re.sub(r"<[^>]*>", "", captured.out)
 
-    assert "[sync-pre-commit-lock]  • https://{old -> new}.repo.local/test   rev1 -> rev2" in out
+    assert_output(captured.out, "[sync-pre-commit-lock]  • https://{old -> new}.repo.local/test   rev1 -> rev2")
 
 
 def test_direct_command_invocation():
