@@ -34,10 +34,12 @@ jobs:
           upload-name-suffix: -${{ matrix.python-version }}-${{ matrix.os }}
           attest-build-provenance-github: ${{ github.event_name != 'pull_request' && !github.event.pull_request.head.repo.fork }}
     outputs:
-        # Outputs the supported Python versions as a JSON array, from the project classifiers
-        python-versions: ${{ steps.baipp.outputs.supported_python_classifiers_json_array }}
+      # Outputs the supported Python versions as a JSON array, from the project classifiers
+      python-versions: ${{ steps.baipp.outputs.supported_python_classifiers_json_array }}
 
   CI-Python:
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     needs: build-package
     env:
@@ -51,10 +53,10 @@ jobs:
         os: [ubuntu-latest]
         include:
           - os: macOS-latest
-            python-version: '3.12'
+            python-version: "3.12"
             pdm-version: ""
           - os: windows-latest
-            python-version: '3.12'
+            python-version: "3.12"
             pdm-version: ""
 
     steps:
@@ -65,10 +67,10 @@ jobs:
         name: Setup PDM
         with:
           cache: true
-          python-version: ${{ matrix.python-version }}             # Version range or exact version of a Python version to use, the same as actions/setup-python
-          version: ${{ matrix.pdm-version }}                   # The version of PDM to install. Leave it as empty to use the latest version from PyPI, or 'head' to use the latest version from GitHub
-          prerelease: true                # Allow prerelease versions of PDM to be installed
-          allow-python-prereleases: true  # Allow prerelease versions of Python to be installed. For example if only 3.12-dev is available, 3.12 will fall back to 3.12-dev
+          python-version: ${{ matrix.python-version }} # Version range or exact version of a Python version to use, the same as actions/setup-python
+          version: ${{ matrix.pdm-version }} # The version of PDM to install. Leave it as empty to use the latest version from PyPI, or 'head' to use the latest version from GitHub
+          prerelease: true # Allow prerelease versions of PDM to be installed
+          allow-python-prereleases: true # Allow prerelease versions of Python to be installed. For example if only 3.12-dev is available, 3.12 will fall back to 3.12-dev
       - name: Set Cache Variables
         id: set_variables
         shell: bash
