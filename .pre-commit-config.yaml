@@ -1,9 +1,9 @@
 ---
 default_language_version:
-  python: python3.11
+  python: python3.12
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
+    rev: v6.0.0
     hooks:
       - id: check-toml
       - id: trailing-whitespace
@@ -32,7 +32,7 @@ repos:
       - id: tox-ini-fmt
 
   - repo: https://github.com/tox-dev/pyproject-fmt
-    rev: "v2.5.0"
+    rev: "v2.10.0"
     hooks:
       - id: pyproject-fmt
         additional_dependencies: ["tox>=4.14.1"]
@@ -54,6 +54,6 @@ repos:
       - id: ruff-format
 
   - repo: https://github.com/pdm-project/pdm
-    rev: 2.26.0
+    rev: 2.25.1
     hooks:
       - id: pdm-lock-check
