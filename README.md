@@ -23,10 +23,10 @@ PDM and Poetry plugin to sync your pre-commit versions with your lockfile and au
 
 ## Supported versions
 
-- Python 3.9+ to 3.13+
-- PDM 2.7.4 to 2.25+
+- Python 3.9+ to 3.14+
+- PDM 2.7.4 to 2.26+
   - Python 3.12.7+ requires PDM 2.20.1+
-- Poetry 1.6 to 2.1+
+- Poetry 1.6 to 2.2+
 - uv (lock version 1)
 
 > ℹ️ While we only test these versions, it should work with more recent versions.
@@ -160,7 +160,7 @@ You can also add a pre-commit hook to sync your lock file before committing, by 
 ```yaml
 repos:
   - repo: https://github.com/GabDug/sync-pre-commit-lock
-    rev: v0.7.3  # Use the latest tag
+    rev: v0.7.3 # Use the latest tag
     hooks: # Choose the one matching your package manager
       - id: sync-pre-commit-pdm
       - id: sync-pre-commit-poetry
@@ -215,20 +215,20 @@ Feel free to open an issue or a PR if you have any idea, or if you want to help!
 
 ### Features or fixes
 
+- [x] Support automatic repository URL update (from legacy aliased repositories)
+- [x] Expose a pre-commit hook to sync the lockfile
+- [x] Support nested `additional_dependencies`, (i.e. mypy types)
 - [x] Support hooks URL aliases for the same Python package
   - [ ] Support user configuration of aliases
 - [ ] Support `pdm config` and clear configuration precedence
 - [ ] Create a more verbose command
 - [ ] Add support for other lockfiles / project managers (pipenv, flit, hatch, etc.)
-- [x] Expose a pre-commit hook to sync the lockfile
-- [x] Support nested `additional_dependencies`, (i.e. mypy types)
 - [ ] Support reading DB from a Python module?
 - [ ] Support reordering DB inputs (file/global config/python module/cli)?
 - [ ] Test using SSH/file dependencies?
 - [ ] Check ref existence before writing?
 - [ ] New feature to convert from pre-commit online to local?
 - [ ] Warning if pre-commit CI auto update is also set?
-- [x] Support automatic repository URL update (from legacy aliased repositories)
 
 ## Inspiration
 

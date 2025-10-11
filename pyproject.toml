@@ -12,7 +12,7 @@ license = { file = "LICENSE" }
 authors = [ { name = "Gabriel Dugny", email = "sync-pre-commit-lock@dugny.me" } ]
 requires-python = ">=3.9"
 classifiers = [
-  "Development Status :: 3 - Alpha",
+  "Development Status :: 4 - Beta",
   "Environment :: Console",
   "Environment :: Plugins",
   "Intended Audience :: Developers",
@@ -25,6 +25,7 @@ classifiers = [
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
   "Typing :: Typed",
 ]
 dynamic = [
@@ -100,7 +101,7 @@ lint.extend-select = [ "D202", "D209", "EM101", "I001", "PTH", "PYI", "Q000", "R
 lint.extend-ignore = [ "S101" ]
 
 [tool.pyproject-fmt]
-max_supported_python = "3.13"
+max_supported_python = "3.14"
 
 [tool.pytest.ini_options]
 minversion = "7.0"
