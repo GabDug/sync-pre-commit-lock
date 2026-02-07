@@ -27,7 +27,7 @@ repos:
         args: ["--write-changes", "--skip=pdm.lock"]
 
   - repo: https://github.com/tox-dev/tox-ini-fmt
-    rev: "1.4.1"
+    rev: "1.7.1"
     hooks:
       - id: tox-ini-fmt
 

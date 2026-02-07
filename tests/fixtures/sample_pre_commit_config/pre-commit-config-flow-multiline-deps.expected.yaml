@@ -1,0 +1,18 @@
+
+# Many unused lines before document separator
+
+---
+default_language_version:
+  python: python3.11
+
+repos:
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    # Some comment
+    rev: v1.5.0
+    hooks:
+      - id: mypy
+        additional_dependencies: [
+          types-PyYAML==1.2.4,
+          types-requests==3.4.5,
+        ]
