@@ -158,7 +158,8 @@ class PreCommitHookConfig:
         original_lines = self.original_file_lines
         updated_lines = original_lines[:]
 
-        for repo_rev in self.yaml["repos"]:
+        repos_list = self.yaml["repos"]
+        for repo_idx, repo_rev in enumerate(repos_list):
             if "rev" not in repo_rev:
                 continue
 
@@ -179,6 +180,12 @@ class PreCommitHookConfig:
             original_rev_line: str = updated_lines[rev_line_idx]
             updated_lines[rev_line_idx] = original_rev_line.replace(str(rev), updated_repo.rev)
 
+            if repo_idx + 1 < len(repos_list):
+                next_repo_start_line = repos_list[repo_idx + 1]["repo"].start_line + self.document_start_offset
+                repo_end_idx = next_repo_start_line - 2
+            else:
+                repo_end_idx = len(updated_lines) - 1
+
             for src_hook, old_hook, new_hook in zip(hooks, normalized_repo.hooks, updated_repo.hooks):
                 if new_hook == old_hook:
                     continue
@@ -191,6 +198,15 @@ class PreCommitHookConfig:
                         continue
                     dep_line_number: int = src_dep.end_line + self.document_start_offset
                     dep_line_idx: int = dep_line_number - 1
+                    old_dep_str = str(old_dep)
+                    if dep_line_idx >= len(updated_lines) or old_dep_str not in updated_lines[dep_line_idx]:
+                        search_start = rev_line_idx
+                        search_end = min(repo_end_idx + 1, len(updated_lines))
+                        candidates = [
+                            idx for idx in range(search_start, search_end) if old_dep_str in updated_lines[idx]
+                        ]
+                        if candidates:
+                            dep_line_idx = min(candidates, key=lambda idx: abs(idx - dep_line_idx))
                     original_dep_line: str = updated_lines[dep_line_idx]
                     updated_lines[dep_line_idx] = original_dep_line.replace(str(src_dep), new_dep)
 
