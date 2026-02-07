@@ -15,7 +15,7 @@ jobs:
   update-dependencies:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Update dependencies with PDM
         uses: pdm-project/update-deps-action@main
