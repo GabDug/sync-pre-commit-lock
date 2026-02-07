@@ -190,3 +190,46 @@ Hook = PreCommitHook
 def test_precommit_repo_equality(repo1: PreCommitRepo, repo2: PreCommitRepo, equal: bool):
     assert (repo1 == repo2) is equal
     assert (hash(repo1) == hash(repo2)) is equal
+
+
+def test_prek_config_support() -> None:
+    # A config file with prek-specific keys
+    file_content = """\
+minimum_prek_version: "0.1.0"
+orphan: true
+repos:
+  - repo: https://github.com/psf/black
+    rev: 23.3.0
+    hooks:
+      - id: black
+        priority: 10
+        env:
+            FOO: bar
+"""
+    mock_path = MagicMock(spec=Path)
+    mock_path.open = mock_open(read_data=file_content)
+
+    config = PreCommitHookConfig.from_yaml_file(mock_path)
+
+    updated_repo = PreCommitRepo(
+        "https://github.com/psf/black",
+        "23.4.0",
+        [PreCommitHook("black")],
+    )
+
+    mock_path.open = mock_open()
+    config.update_pre_commit_repo_versions({config.repos[0]: updated_repo})
+
+    expected_content = """\
+minimum_prek_version: "0.1.0"
+orphan: true
+repos:
+  - repo: https://github.com/psf/black
+    rev: 23.4.0
+    hooks:
+      - id: black
+        priority: 10
+        env:
+            FOO: bar
+"""
+    mock_path.open().writelines.assert_called_once_with(expected_content.splitlines(keepends=True))
