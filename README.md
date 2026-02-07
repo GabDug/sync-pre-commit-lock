@@ -19,14 +19,15 @@ PDM and Poetry plugin to sync your pre-commit versions with your lockfile and au
 - ⏩ Run every time you run the lockfile is updated, not as a pre-commit hook
 - 🔄 Install pre-commit hooks automatically, no need to run `pre-commit install` manually
 - 💫 Preserve your pre-commit config file formatting
+- ✨ Support [prek](https://prek.j178.dev/) configuration files (preserve `prek` specific keys)
 - 🍃 Lightweight, only depends on [strictyaml](https://pypi.org/project/strictyaml/) and [packaging](https://pypi.org/project/packaging/)
 
 ## Supported versions
 
-- Python 3.9+ to 3.14+
+- Python 3.10+ to 3.14+
 - PDM 2.7.4 to 2.26+
   - Python 3.12.7+ requires PDM 2.20.1+
-- Poetry 1.6 to 2.2+
+- Poetry 1.6 to 2.3+
 - uv (lock version 1)
 
 > ℹ️ While we only test these versions, it should work with more recent versions.
@@ -87,6 +88,7 @@ disable-sync-from-lock = false
 # Packages to ignore when syncing from lock
 ignore = []
 # Name of the pre-commit config file to sync with
+# Can be set to ".pre-commit-config.yml" to support prek alternate config file
 pre-commit-config-file = ".pre-commit-config.yaml"
 # Additional mapping of URLs to python packages
 # Default is empty, but will merge with the default mapping
