@@ -10,7 +10,7 @@ description = "PDM plugin to sync your pre-commit versions with your lockfile, a
 readme = "README.md"
 license = { file = "LICENSE" }
 authors = [ { name = "Gabriel Dugny", email = "sync-pre-commit-lock@dugny.me" } ]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 classifiers = [
   "Development Status :: 4 - Beta",
   "Environment :: Console",
@@ -20,7 +20,6 @@ classifiers = [
   "Operating System :: OS Independent",
   "Programming Language :: Python",
   "Programming Language :: Python :: 3 :: Only",
-  "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
@@ -35,7 +34,6 @@ dependencies = [
   "packaging>=24.1",
   "strictyaml>=1.7.3",
   "tomli>=2; python_version<'3.11'",
-  "typing-extensions; python_version<'3.10'",
 ]
 optional-dependencies.pdm = [
   "pdm>=2.7.4",

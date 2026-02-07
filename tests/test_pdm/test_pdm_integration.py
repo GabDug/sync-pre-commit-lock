@@ -40,7 +40,7 @@ def test_pdm_lock(pdm: PDMCallable, project: Project):
 def test_pdm_install(pdm: PDMCallable, project: Project):
     # Needed by pdm 2.7
     # See: https://github.com/pdm-project/pdm/issues/917
-    project.pyproject.metadata["requires-python"] = ">=3.9"
+    project.pyproject.metadata["requires-python"] = ">=3.10"
     project.pyproject.write()
     pdm("add ruff==0.6.7 -v", obj=project, strict=True)
 
