@@ -78,7 +78,7 @@ jobs:
           echo "PIP_CACHE=$(pip cache dir)" >> $GITHUB_OUTPUT
           echo "PDM_CACHE=$(pdm config cache_dir)" >> $GITHUB_OUTPUT
       - name: Cache PIP and PDM
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ${{ steps.set_variables.outputs.PIP_CACHE }}
