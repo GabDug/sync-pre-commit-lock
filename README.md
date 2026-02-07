@@ -23,7 +23,7 @@ PDM and Poetry plugin to sync your pre-commit versions with your lockfile and au
 
 ## Supported versions
 
-- Python 3.9+ to 3.14+
+- Python 3.10+ to 3.14+
 - PDM 2.7.4 to 2.26+
   - Python 3.12.7+ requires PDM 2.20.1+
 - Poetry 1.6 to 2.3+

@@ -1,10 +1,4 @@
-import sys
-from typing import TypedDict
-
-if sys.version_info >= (3, 10):
-    from typing import TypeAlias
-else:
-    from typing_extensions import TypeAlias
+from typing import TypeAlias, TypedDict
 
 
 class RepoInfo(TypedDict):
