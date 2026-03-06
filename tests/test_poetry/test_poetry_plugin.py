@@ -39,7 +39,7 @@ def test_handle_post_command_exit_code_not_zero() -> None:
 
 @patch("sync_pre_commit_lock.poetry_plugin.PoetrySetupPreCommitHooks.execute")
 @patch("sync_pre_commit_lock.config.toml.load", return_value={"tool": {"sync-pre-commit-lock": {}}})
-def test_handle_post_command_install_add_commands(mocked_execute: MagicMock, mock_load: MagicMock) -> None:
+def test_handle_post_command_install_add_commands(mock_load: MagicMock, mocked_execute: MagicMock) -> None:
     event = MagicMock(
         spec=ConsoleTerminateEvent,
         exit_code=0,
@@ -53,6 +53,9 @@ def test_handle_post_command_install_add_commands(mocked_execute: MagicMock, moc
     plugin._handle_post_command(event, event_name, dispatcher)
 
     mocked_execute.assert_called_once()
+    # toml.load is called twice: once for hook_runner config in _handle_post_command,
+    # once for plugin_config in run_sync_pre_commit_version
+    assert mock_load.call_count == 2
 
 
 def test_handle_post_command_self_command() -> None:
@@ -69,7 +72,7 @@ def test_handle_post_command_self_command() -> None:
 
 @patch("sync_pre_commit_lock.poetry_plugin.SyncPreCommitHooksVersion.execute")
 @patch("sync_pre_commit_lock.config.toml.load", return_value={"tool": {"sync-pre-commit-lock": {}}})
-def test_handle_post_command_install_add_lock_update_commands(mocked_execute: MagicMock, mock_load: MagicMock) -> None:
+def test_handle_post_command_install_add_lock_update_commands(mock_load: MagicMock, mocked_execute: MagicMock) -> None:
     event = MagicMock(
         spec=ConsoleTerminateEvent,
         exit_code=0,

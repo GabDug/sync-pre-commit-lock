@@ -90,6 +90,9 @@ ignore = []
 # Name of the pre-commit config file to sync with
 # Can be set to ".pre-commit-config.yml" to support prek alternate config file
 pre-commit-config-file = ".pre-commit-config.yaml"
+# Hook runner to use for installing hooks: "pre-commit", "prek", or "auto"
+# "auto" tries prek first, then falls back to pre-commit
+hook-runner = "pre-commit"
 # Additional mapping of URLs to python packages
 # Default is empty, but will merge with the default mapping
 # "rev" indicates the format of the Git tags
@@ -103,12 +106,13 @@ dependency-mapping = {"package-name"= {"repo"= "https://github.com/example/packa
 
 Some settings are overridable by environment variables with the following `SYNC_PRE_COMMIT_LOCK_*` prefixed environment variables:
 
-| `toml` setting                | environment                            | format                            |
-| ----------------------------- | -------------------------------------- | --------------------------------- |
-| `automatically-install-hooks` | `SYNC_PRE_COMMIT_LOCK_INSTALL`         | `bool` as string (`true`, `1`...) |
-| `disable-sync-from-lock`      | `SYNC_PRE_COMMIT_LOCK_DISABLED`        | `bool` as string (`true`, `1`...) |
-| `ignore`                      | `SYNC_PRE_COMMIT_LOCK_IGNORE`          | comma-separated list              |
-| `pre-commit-config-file`      | `SYNC_PRE_COMMIT_LOCK_PRE_COMMIT_FILE` | `str`                             |
+| `toml` setting                | environment                            | format                                      |
+| ----------------------------- | -------------------------------------- | ------------------------------------------- |
+| `automatically-install-hooks` | `SYNC_PRE_COMMIT_LOCK_INSTALL`         | `bool` as string (`true`, `1`...)           |
+| `disable-sync-from-lock`      | `SYNC_PRE_COMMIT_LOCK_DISABLED`        | `bool` as string (`true`, `1`...)           |
+| `ignore`                      | `SYNC_PRE_COMMIT_LOCK_IGNORE`          | comma-separated list                        |
+| `pre-commit-config-file`      | `SYNC_PRE_COMMIT_LOCK_PRE_COMMIT_FILE` | `str`                                       |
+| `hook-runner`                 | `SYNC_PRE_COMMIT_LOCK_HOOK_RUNNER`     | `str` (`pre-commit`, `prek`, or `auto`)     |
 
 ## Usage
 

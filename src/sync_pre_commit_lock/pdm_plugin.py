@@ -132,8 +132,7 @@ def register_pdm_plugin(core: Core) -> None:
 
 
 class PDMSetupPreCommitHooks(SetupPreCommitHooks):
-    install_pre_commit_hooks_command: ClassVar[Sequence[str | bytes]] = ["pdm", "run", "pre-commit", "install"]
-    check_pre_commit_version_command: ClassVar[Sequence[str | bytes]] = ["pdm", "run", "pre-commit", "--version"]
+    command_prefix: ClassVar[Sequence[str]] = ("pdm", "run")
 
 
 class PDMSyncPreCommitHooksVersion(SyncPreCommitHooksVersion):
@@ -150,7 +149,7 @@ def on_pdm_install_setup_pre_commit(project: Project, *, dry_run: bool, **_: Any
     if not plugin_config.automatically_install_hooks:
         printer.debug("Automatically installing pre-commit hooks is disabled. Skipping.")
         return
-    action = PDMSetupPreCommitHooks(printer, dry_run=dry_run)
+    action = PDMSetupPreCommitHooks(printer, dry_run=dry_run, hook_runner=plugin_config.hook_runner)
     file_path = project.root / plugin_config.pre_commit_config_file
     if not file_path.exists():
         printer.info("No pre-commit config file found, skipping pre-commit hook check")
