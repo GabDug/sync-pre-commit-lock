@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 from dataclasses import dataclass, field
+from enum import Enum
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable, TypedDict
 
@@ -9,6 +10,15 @@ from ._compat import toml
 
 if TYPE_CHECKING:
     from sync_pre_commit_lock.db import PackageRepoMapping
+
+
+class HookRunner(str, Enum):
+    """The hook runner to use for installing git hooks."""
+
+    PRE_COMMIT = "pre-commit"
+    PREK = "prek"
+    AUTO = "auto"
+
 
 ENV_PREFIX = "SYNC_PRE_COMMIT_LOCK"
 
@@ -73,6 +83,10 @@ class SyncPreCommitLockConfig:
     dependency_mapping: PackageRepoMapping = field(
         default_factory=dict,
         metadata=Metadata(toml="dependency-mapping"),
+    )
+    hook_runner: HookRunner = field(
+        default=HookRunner.PRE_COMMIT,
+        metadata=Metadata(toml="hook-runner", env="HOOK_RUNNER", cast=HookRunner),
     )
 
 

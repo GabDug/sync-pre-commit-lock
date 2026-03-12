@@ -136,8 +136,7 @@ class PoetryPrinter(Printer):
 
 
 class PoetrySetupPreCommitHooks(SetupPreCommitHooks):
-    install_pre_commit_hooks_command: ClassVar[Sequence[str | bytes]] = ["poetry", "run", "pre-commit", "install"]
-    check_pre_commit_version_command: ClassVar[Sequence[str | bytes]] = ["poetry", "run", "pre-commit", "--version"]
+    command_prefix: ClassVar[Sequence[str]] = ("poetry", "run")
 
 
 def run_sync_pre_commit_version(printer: PoetryPrinter, dry_run: bool, application: Application) -> None:
@@ -186,7 +185,8 @@ class SyncPreCommitLockPlugin(ApplicationPlugin):
             return
 
         if any(isinstance(command, t) for t in [InstallCommand, AddCommand]):
-            PoetrySetupPreCommitHooks(printer, dry_run=dry_run).execute()
+            plugin_config = load_config(self.application.poetry.pyproject_path) if self.application else load_config()
+            PoetrySetupPreCommitHooks(printer, dry_run=dry_run, hook_runner=plugin_config.hook_runner).execute()
 
         if any(isinstance(command, t) for t in [InstallCommand, AddCommand, LockCommand, UpdateCommand]):
             if self.application is None:
