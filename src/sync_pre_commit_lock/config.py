@@ -89,6 +89,10 @@ class SyncPreCommitLockConfig:
         metadata=Metadata(toml="hook-runner", env="HOOK_RUNNER", cast=HookRunner),
     )
 
+    def __post_init__(self) -> None:
+        if not isinstance(self.hook_runner, HookRunner):
+            self.hook_runner = HookRunner(self.hook_runner)
+
 
 def load_config(path: Path | None = None) -> SyncPreCommitLockConfig:
     """
