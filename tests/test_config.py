@@ -2,7 +2,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from sync_pre_commit_lock.config import SyncPreCommitLockConfig, from_toml, load_config, update_from_env
+from sync_pre_commit_lock.config import HookRunner, SyncPreCommitLockConfig, from_toml, load_config, update_from_env
 from sync_pre_commit_lock.db import RepoInfo
 
 
@@ -12,17 +12,20 @@ def test_from_toml() -> None:
         "ignore": ["a", "b"],
         "pre-commit-config-file": ".test-config.yaml",
         "dependency-mapping": {"pytest": {"repo": "pytest", "rev": "${ver}"}},
+        "hook-runner": "prek",
     }
     expected_config = SyncPreCommitLockConfig(
         disable_sync_from_lock=True,
         ignore=["a", "b"],
         pre_commit_config_file=".test-config.yaml",
         dependency_mapping={"pytest": RepoInfo(repo="pytest", rev="${ver}")},
+        hook_runner=HookRunner.PREK,
     )
 
     actual_config = from_toml(data)
 
     assert actual_config == expected_config
+    assert isinstance(actual_config.hook_runner, HookRunner)
 
 
 def test_update_from_env(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -30,12 +33,14 @@ def test_update_from_env(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("SYNC_PRE_COMMIT_LOCK_INSTALL", "false")
     monkeypatch.setenv("SYNC_PRE_COMMIT_LOCK_IGNORE", "a, b")
     monkeypatch.setenv("SYNC_PRE_COMMIT_LOCK_PRE_COMMIT_FILE", ".test-config.yaml")
+    monkeypatch.setenv("SYNC_PRE_COMMIT_LOCK_HOOK_RUNNER", "prek")
     expected_config = SyncPreCommitLockConfig(
         automatically_install_hooks=False,
         disable_sync_from_lock=True,
         ignore=["a", "b"],
         pre_commit_config_file=".test-config.yaml",
         dependency_mapping={},
+        hook_runner=HookRunner.PREK,
     )
 
     actual_config = update_from_env(SyncPreCommitLockConfig())
