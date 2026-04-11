@@ -12,17 +12,20 @@ def test_from_toml() -> None:
         "ignore": ["a", "b"],
         "pre-commit-config-file": ".test-config.yaml",
         "dependency-mapping": {"pytest": {"repo": "pytest", "rev": "${ver}"}},
+        "hook-runner": "prek",
     }
     expected_config = SyncPreCommitLockConfig(
         disable_sync_from_lock=True,
         ignore=["a", "b"],
         pre_commit_config_file=".test-config.yaml",
         dependency_mapping={"pytest": RepoInfo(repo="pytest", rev="${ver}")},
+        hook_runner=HookRunner.PREK,
     )
 
     actual_config = from_toml(data)
 
     assert actual_config == expected_config
+    assert isinstance(actual_config.hook_runner, HookRunner)
 
 
 def test_update_from_env(monkeypatch: pytest.MonkeyPatch) -> None:
