@@ -24,12 +24,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
           fetch-depth: 0
+          persist-credentials: false
       - name: Check built Python package
         id: baipp
-        uses: hynek/build-and-inspect-python-package@v2
+        uses: hynek/build-and-inspect-python-package@d44ca7d91762de7a7d5436ddae667c6da6d1c3df # v2.18.0
         with:
           upload-name-suffix: -${{ matrix.python-version }}-${{ matrix.os }}
           attest-build-provenance-github: ${{ github.event_name != 'pull_request' && !github.event.pull_request.head.repo.fork }}
@@ -60,10 +61,11 @@ jobs:
             pdm-version: ""
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
           fetch-depth: 0
-      - uses: pdm-project/setup-pdm@v4
+          persist-credentials: false
+      - uses: pdm-project/setup-pdm@94a823180e06fcde4ad29308721954a521c96ed0 # v4.4
         name: Setup PDM
         with:
           cache: true
@@ -78,7 +80,7 @@ jobs:
           echo "PIP_CACHE=$(pip cache dir)" >> $GITHUB_OUTPUT
           echo "PDM_CACHE=$(pdm config cache_dir)" >> $GITHUB_OUTPUT
       - name: Cache PIP and PDM
-        uses: actions/cache@v5
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
         with:
           path: |
             ${{ steps.set_variables.outputs.PIP_CACHE }}
@@ -93,7 +95,7 @@ jobs:
         run: pdm run tox
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@0fb7174895f61a3b6b78fc075e0cd60383518dac # v5.5.5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           file: ./coverage.xml

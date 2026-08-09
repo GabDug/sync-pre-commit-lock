@@ -15,10 +15,12 @@ jobs:
   update-dependencies:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
 
       - name: Update dependencies with PDM
-        uses: pdm-project/update-deps-action@main
+        uses: pdm-project/update-deps-action@22852fcff9a131d732730e8db92cc9502643a260 # v1.12
         with:
           # The personal access token, default: ${{ github.token }}
           token: ${{ github.token }}
