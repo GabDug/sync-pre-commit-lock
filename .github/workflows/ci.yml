@@ -24,13 +24,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
           persist-credentials: false
       - name: Check built Python package
         id: baipp
-        uses: hynek/build-and-inspect-python-package@d44ca7d91762de7a7d5436ddae667c6da6d1c3df # v2.18.0
+        uses: hynek/build-and-inspect-python-package@2abe76da66d0a6a4a227101f9348ee855797cfa5 # v3.0.1
         with:
           upload-name-suffix: -${{ matrix.python-version }}-${{ matrix.os }}
           attest-build-provenance-github: ${{ github.event_name != 'pull_request' && !github.event.pull_request.head.repo.fork }}
@@ -61,11 +61,11 @@ jobs:
             pdm-version: ""
 
     steps:
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
           persist-credentials: false
-      - uses: pdm-project/setup-pdm@94a823180e06fcde4ad29308721954a521c96ed0 # v4.4
+      - uses: pdm-project/setup-pdm@973541a5febeafcfdadf8a51211435be6ecfd90f # v4.5
         name: Setup PDM
         with:
           cache: true
@@ -80,7 +80,7 @@ jobs:
           echo "PIP_CACHE=$(pip cache dir)" >> $GITHUB_OUTPUT
           echo "PDM_CACHE=$(pdm config cache_dir)" >> $GITHUB_OUTPUT
       - name: Cache PIP and PDM
-        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: |
             ${{ steps.set_variables.outputs.PIP_CACHE }}
@@ -95,7 +95,7 @@ jobs:
         run: pdm run tox
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@0fb7174895f61a3b6b78fc075e0cd60383518dac # v5.5.5
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           file: ./coverage.xml
