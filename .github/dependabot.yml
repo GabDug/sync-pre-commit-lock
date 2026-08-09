@@ -2,8 +2,13 @@
 version: 2
 updates:
 
-  # Maintain dependencies for GitHub Actions
+  # Maintain SHA-pinned GitHub Actions (Dependabot updates the commit SHA
+  # and trailing version comment together when a new release is available).
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
+    groups:
+      github-actions:
+        patterns:
+          - "*"
