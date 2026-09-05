@@ -164,7 +164,7 @@ if TYPE_CHECKING:
     Resolution = Union[dict[str, list[Candidate]], dict[str, Candidate]]
 
 
-def select_candidate(candidate: Union[Candidate, list[Candidate]]) -> Candidate | None:
+def select_candidate(candidate: Candidate | list[Candidate]) -> Candidate | None:
     if isinstance(candidate, Iterable):
         return next(iter(candidate), None)
     return candidate
