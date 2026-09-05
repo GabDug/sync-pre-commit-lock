@@ -7,7 +7,6 @@ from unittest import mock
 import pytest
 
 pdm_module = pytest.importorskip("pdm")
-# ruff: noqa: E402
 from pdm.core import Core
 from pdm.project import Project
 from pdm.termui import UI
