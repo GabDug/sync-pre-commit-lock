@@ -1,3 +1,4 @@
+import builtins
 from pathlib import Path
 from unittest.mock import MagicMock, mock_open
 
@@ -5,7 +6,12 @@ import pytest
 import yaml
 from strictyaml.exceptions import YAMLValidationError
 
-from sync_pre_commit_lock.pre_commit_config import PreCommitHook, PreCommitHookConfig, PreCommitRepo
+from sync_pre_commit_lock.pre_commit_config import (
+    PreCommitHook,
+    PreCommitHookConfig,
+    PreCommitRepo,
+    _round_trip_load,
+)
 
 
 def test_pre_commit_hook_config_initialization() -> None:
@@ -53,21 +59,6 @@ def test_repos_property() -> None:
 FIXTURES = Path(__file__).parent / "fixtures" / "sample_pre_commit_config"
 
 
-@pytest.mark.parametrize(
-    ("path", "offset"),
-    [
-        (FIXTURES / "pre-commit-config-document-separator.yaml", 4),
-        (FIXTURES / "pre-commit-config-start-empty-lines.yaml", 0),
-        (FIXTURES / "pre-commit-config-with-local.yaml", 2),
-        (FIXTURES / "pre-commit-config.yaml", 1),
-        (FIXTURES / "sample-django-stubs.yaml", 0),
-    ],
-)
-def test_files_offset(path: Path, offset: int) -> None:
-    config = PreCommitHookConfig.from_yaml_file(path)
-    assert config.document_start_offset == offset
-
-
 def test_update_versions() -> None:
     config = PreCommitHookConfig.from_yaml_file(FIXTURES / "pre-commit-config-document-separator.yaml")
     config.pre_commit_config_file_path = MagicMock()
@@ -87,13 +78,91 @@ def test_update_versions() -> None:
         assert config.pre_commit_config_file_path.open.call_count == 1
 
 
-@pytest.mark.parametrize("base", ["only-deps", "with-deps", "with-one-liner-deps", "without-new-deps"])
+@pytest.mark.parametrize(
+    "name",
+    [
+        "pre-commit-config.yaml",
+        "pre-commit-config-document-separator.yaml",
+        "pre-commit-config-start-empty-lines.yaml",
+        "pre-commit-config-with-local.yaml",
+        "sample-django-stubs.yaml",
+    ],
+)
+def test_update_versions_rewrites_only_the_rev(name: str) -> None:
+    """Whatever precedes the rev -- blank lines, comments, a `---` separator, a local repo
+    with no rev -- the bump must land on that rev and change nothing else (#64).
+    """
+    path = FIXTURES / name
+    config = PreCommitHookConfig.from_yaml_file(path)
+    mock_file = config.pre_commit_config_file_path = MagicMock()
+    mock_file.open = mock_open()
+
+    initial_repo = config.repos[0]
+    config.update_pre_commit_repo_versions(
+        {initial_repo: PreCommitRepo(initial_repo.repo, "99.99.99", initial_repo.hooks)}
+    )
+
+    written = "".join(mock_file.open().writelines.call_args[0][0])
+    assert "99.99.99" in written
+    assert written.replace("99.99.99", initial_repo.rev) == path.read_text()
+
+
+def test_round_trip_load_explains_itself_without_a_ruamel_parser(monkeypatch: pytest.MonkeyPatch) -> None:
+    """strictyaml vendors ruamel today; if a future one stops, say what to install."""
+    real_import = builtins.__import__
+
+    def no_ruamel(name: str, *args: object, **kwargs: object) -> object:
+        if name in {"strictyaml.ruamel", "ruamel.yaml"}:
+            raise ImportError(name)
+        return real_import(name, *args, **kwargs)  # type: ignore[arg-type]
+
+    monkeypatch.setattr(builtins, "__import__", no_ruamel)
+
+    with pytest.raises(RuntimeError, match="Install ruamel.yaml"):
+        _round_trip_load("repos: []")
+
+
+def test_update_deps_sharing_a_line_when_the_first_one_shrinks() -> None:
+    """A shorter replacement shifts every column after it on that line, so edits must be
+    applied rightmost-first or the later dependency is silently left untouched.
+    """
+    file_content = """\
+repos:
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.0.0
+    hooks:
+      - id: mypy
+        additional_dependencies: [types-PyYAML==6.0.12.20240311, types-requests==2.31.0]
+"""
+    mock_path = MagicMock(spec=Path)
+    mock_path.open = mock_open(read_data=file_content)
+    config = PreCommitHookConfig.from_yaml_file(mock_path)
+
+    initial_repo = config.repos[0]
+    mock_path.open = mock_open()
+    config.update_pre_commit_repo_versions(
+        {
+            initial_repo: PreCommitRepo(
+                initial_repo.repo,
+                initial_repo.rev,
+                [PreCommitHook("mypy", ["types-PyYAML==6.0.12", "types-requests==2.32.0"])],
+            )
+        }
+    )
+
+    written = "".join(mock_path.open().writelines.call_args[0][0])
+    assert "additional_dependencies: [types-PyYAML==6.0.12, types-requests==2.32.0]" in written
+
+
+@pytest.mark.parametrize(
+    "base", ["only-deps", "with-deps", "with-one-liner-deps", "without-new-deps", "flow-multiline-deps"]
+)
 def test_update_additional_dependencies_versions(base: str) -> None:
     config = PreCommitHookConfig.from_yaml_file(FIXTURES / f"pre-commit-config-{base}.yaml")
     mock_file = config.pre_commit_config_file_path = MagicMock()
     mock_file.open = mock_open()
 
-    initial_repo = config.repos[0]
+    initial_repo = next(repo for repo in config.repos if repo.repo.endswith("/mirrors-mypy"))
     updated_repo = PreCommitRepo(
         "https://github.com/pre-commit/mirrors-mypy",
         "v1.5.0",
