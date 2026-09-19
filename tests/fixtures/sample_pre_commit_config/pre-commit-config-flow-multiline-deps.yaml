@@ -1,0 +1,30 @@
+
+# Many unused lines before document separator
+
+---
+default_language_version:
+  python: python3.11
+
+repos:
+
+  # This multi-line flow sequence is what strictyaml miscounts, shifting every
+  # line reported below it (see #64).
+  - repo: https://github.com/python-jsonschema/check-jsonschema
+    rev: "0.36.1"
+    hooks:
+      - id: check-jsonschema
+        args: [
+            "--no-cache",
+            "--schemafile",
+            "https://example.invalid/schema.json",
+          ]
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    # Some comment
+    rev: v1.0.0
+    hooks:
+      - id: mypy
+        additional_dependencies: [
+          types-PyYAML==1.2.4,
+          types-requests,
+        ]
