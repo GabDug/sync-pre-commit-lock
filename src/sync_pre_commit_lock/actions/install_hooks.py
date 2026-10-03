@@ -116,7 +116,7 @@ class SetupPreCommitHooks:
 
     def _get_git_directory_path(self) -> Path | None:
         try:
-            result = subprocess.check_output(  # noqa: S603
+            result = subprocess.check_output(
                 ["git", "rev-parse", "--show-toplevel"],  # noqa: S607
                 stderr=subprocess.PIPE,
             )
