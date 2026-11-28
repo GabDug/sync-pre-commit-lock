@@ -8,7 +8,6 @@ import pytest
 from packaging.version import Version
 
 pdm_module = pytest.importorskip("pdm")
-# ruff: noqa: E402
 from pdm.__version__ import __version__ as pdm_version
 from pdm.core import Core
 from pdm.models.candidates import Candidate
