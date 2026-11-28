@@ -29,14 +29,12 @@ def normalize_git_url(url: str) -> str:
     path = parsed_url.path
 
     # Remove .git from the end of path if it's there
-    if path.endswith(".git"):
-        path = path[:-4]
+    path = path.removesuffix(".git")
 
     # Reconstruct the URL
     normalized_url = urlunparse((scheme, netloc, path, None, None, None))
 
-    if normalized_url.endswith("/"):
-        normalized_url = normalized_url[:-1]
+    normalized_url = normalized_url.removesuffix("/")
 
     return normalized_url
 
